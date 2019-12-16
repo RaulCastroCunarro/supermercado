@@ -67,7 +67,8 @@ main{
 
 .producto img{
     width: 100%;
-    height: auto;
+    object-fit: scale-down;
+    height: 10rem;
 }
 
 .producto .body{
@@ -84,6 +85,10 @@ main{
 .producto .precio-original{
     color: rgb(237, 90, 90);
     font-weight: 900;
+}
+
+.producto .precio-unidad{
+    height: 2rem;
 }
 
 .producto .descripcion {

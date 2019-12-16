@@ -1,5 +1,8 @@
 package com.ipartek.formacion.supermercado.modelo.pojo;
 
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+
 public class Producto {
 	
 	public static final int DESCUENTO_MIN = 0;
@@ -79,6 +82,17 @@ public class Producto {
 
 	public void setDescuento(int descuento) {
 		this.descuento = descuento;
+	}
+	
+	public float getPrecioDescuento() {
+		/*DecimalFormatSymbols separador = new DecimalFormatSymbols();
+		separador.setDecimalSeparator('.');
+		DecimalFormat formato1 = new DecimalFormat("#.00",separador);*/
+		
+		float resultado = (this.precio*(100 - this.descuento))/100;
+		//resultado = Float.parseFloat(formato1.format(resultado));
+		
+		return resultado;
 	}
 
 	@Override

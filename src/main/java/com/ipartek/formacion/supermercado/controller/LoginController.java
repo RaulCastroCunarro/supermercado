@@ -36,6 +36,7 @@ public class LoginController extends HttpServlet {
 		try {
 			if(USUARIO.equals(nombre) && PASSWORD.equals(pass)){
 				HttpSession sesion = request.getSession();
+				sesion.setAttribute("usuarioLogeado", "Raúl");
 				sesion.setMaxInactiveInterval(60*3);
 				
 				view = "seguridad/index.jsp";

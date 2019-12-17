@@ -118,7 +118,7 @@ public class ProductosController extends HttpServlet {
 	}
 
 	private void eliminar(HttpServletRequest request, HttpServletResponse response) throws Exception {
-		int id = Integer.parseInt( request.getParameter("id") );
+		int id = Integer.parseInt(request.getParameter("id"));
 		dao.delete(id);
 		vistaSeleccionada = VIEW_TABLA;
 	}
@@ -153,7 +153,11 @@ public class ProductosController extends HttpServlet {
 	}
 
 	private void irFormulario(HttpServletRequest request, HttpServletResponse response) {
-		Producto productoForm = dao.getById(Integer.parseInt(pId));
+		Producto productoForm = null;
+		if (pId != null) {
+			productoForm = 	dao.getById(Integer.parseInt(pId));
+		}
+		
 		if (productoForm == null) {
 			productoForm = new Producto();
 		}

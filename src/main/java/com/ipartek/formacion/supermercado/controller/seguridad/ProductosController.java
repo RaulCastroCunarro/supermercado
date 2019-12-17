@@ -1,6 +1,7 @@
 package com.ipartek.formacion.supermercado.controller.seguridad;
 
 import java.util.List;
+import java.util.regex.Pattern;
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -90,7 +91,7 @@ public class ProductosController extends HttpServlet {
 			case ACCION_LISTAR:
 				listar(request, response);
 				break;
-				
+
 			case ACCION_FORM:
 				irFormulario(request, response);
 				break;
@@ -113,7 +114,7 @@ public class ProductosController extends HttpServlet {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} finally {
-			request.getRequestDispatcher( vistaSeleccionada).forward(request, response);
+			request.getRequestDispatcher(vistaSeleccionada).forward(request, response);
 		}
 	}
 
@@ -124,40 +125,61 @@ public class ProductosController extends HttpServlet {
 	}
 
 	private void guardar(HttpServletRequest request, HttpServletResponse response) throws Exception {
-		int id = Integer.parseInt( request.getParameter("id") );
-		String nombre = request.getParameter("nombre");
-		float  precio = Float.parseFloat(request.getParameter("precio"));
-		String imagen = request.getParameter("imagen");
-		String descripcion = request.getParameter("descripcion");
-		int descuento = Integer.parseInt(request.getParameter("descuento"));
-		
-		Producto pojo = null;
-		List<Producto> listado = dao.getAll();
-		if(id ==0) {
-			pojo = new Producto(nombre,precio,imagen,descripcion,descuento);
-			dao.create(pojo);
-		}else {
-			for (Producto producto : listado) {
-				if (producto.getId() == id) {
-					producto.setNombre(nombre);
-					producto.setImagen(imagen);
-					producto.setDescripcion(descripcion);
-					producto.setDescuento(descuento);
-					producto.setPrecio(precio);
+		String mensaje = "";
+
+		if (pId == null || pId.matches("^\\d+$") == false) {
+			mensaje = "El ID solo puede ser un número entero";
+		} else if (pNombre == "") {
+			mensaje = "El nombre no puede ser vacío";
+		} else if (Float.parseFloat(pPrecio) < 0) {
+			mensaje = "El precio no puede ser mnegativo";
+		} else if (Pattern.matches("http(|s):.*/.(jpg|png|jpeg|gif)", pImagen) == false) {
+			mensaje = "Debe introducirse una URL valida";
+		} else if (pDescripcion == "") {
+			mensaje = "Debe incluirse una descripción del producto";
+		} else if (Integer.parseInt(pDescuento) < 0 || Integer.parseInt(pDescuento) > 100) {
+			mensaje = "El descuento debe estar entre 0 y 100";
+		} else {
+
+			int id = Integer.parseInt(request.getParameter("id"));
+			String nombre = request.getParameter("nombre");
+			float precio = Float.parseFloat(request.getParameter("precio"));
+			String imagen = request.getParameter("imagen");
+			String descripcion = request.getParameter("descripcion");
+			int descuento = Integer.parseInt(request.getParameter("descuento"));
+
+			Producto pojo = null;
+			List<Producto> listado = dao.getAll();
+			if (id == 0) {
+				pojo = new Producto(nombre, precio, imagen, descripcion, descuento);
+				dao.create(pojo);
+			} else {
+				for (Producto producto : listado) {
+					if (producto.getId() == id) {
+						producto.setNombre(nombre);
+						producto.setImagen(imagen);
+						producto.setDescripcion(descripcion);
+						producto.setDescuento(descuento);
+						producto.setPrecio(precio);
+					}
 				}
 			}
+
+			request.setAttribute("productos", dao.getAll());
+			vistaSeleccionada = VIEW_TABLA;
 		}
-		
-		request.setAttribute("productos", dao.getAll());
-		vistaSeleccionada = VIEW_TABLA;
+		if (mensaje != "") {
+			request.setAttribute("mensaje", mensaje);
+			vistaSeleccionada = VIEW_FORM;
+		}
 	}
 
 	private void irFormulario(HttpServletRequest request, HttpServletResponse response) {
 		Producto productoForm = null;
 		if (pId != null) {
-			productoForm = 	dao.getById(Integer.parseInt(pId));
+			productoForm = dao.getById(Integer.parseInt(pId));
 		}
-		
+
 		if (productoForm == null) {
 			productoForm = new Producto();
 		}

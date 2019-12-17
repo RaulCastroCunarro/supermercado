@@ -19,9 +19,9 @@
 				<div class="col-6 col-md offset-6">
 					<h5>Enlaces de Interes</h5>
 					<ul class="list-unstyled text-small">
-						<li><a class="text-muted" href="politica-privacidad.html">Politica
+						<li><a class="text-muted" href="politica-privacidad.html">Política de
 								Privacidad</a></li>
-						<li><a class="text-muted" href="localizacion.html">LocalizaciÃ³n</a></li>
+						<li><a class="text-muted" href="localizacion.html">Localización</a></li>
 						<li><a class="text-muted" href="contacto.html">Contacto</a></li>
 					</ul>
 				</div>

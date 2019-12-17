@@ -4,7 +4,7 @@
 
 <h1>Tabla</h1>
 
-<a href="/seguridad/productos?accion=formulario">Nuevo Producto</a>
+<a href="seguridad/productos?accion=formulario&id=0">Nuevo Producto</a>
 
 <div class="card shadow mb-4">
 	<div class="card-header py-3">
@@ -45,7 +45,7 @@
 							<td>${p.descripcion}</td>
 							<td>${p.descuento}</td>
 							<td><a
-								href="/seguridad/productos?accion=formulario&id=${p.id}">Editar</a>
+								href="seguridad/productos?accion=formulario&id=${p.id}">Editar</a>
 						</tr>
 					</c:forEach>
 				</tbody>
@@ -53,11 +53,4 @@
 		</div>
 	</div>
 </div>
-<ol>
-	<c:forEach items="${productos}" var="p">
-		<li>${p}<br> <a
-			href="/seguridad/productos?accion=formulario&id=${p.id}">Editar</a>
-		</li>
-	</c:forEach>
-</ol>
 <%@include file="/include/footer.jsp"%>

@@ -63,26 +63,54 @@ public class ProductoDAO implements IDAO<Producto>{
 
 	@Override
 	public Producto getById(int id) {
-		// TODO Auto-generated method stub
-		return null;
+		Producto resultado = null;
+		for (Producto producto : registros) {
+			if (producto.getId() == id){
+				resultado = producto;
+				break;
+			}
+		}
+		return resultado;
 	}
 
 	@Override
 	public Producto delete(int id) throws Exception {
-		// TODO Auto-generated method stub
-		return null;
+		Producto resultado = null;
+		for (Producto producto : registros) {
+			if (producto.getId() == id){
+				resultado = producto;
+				registros.remove(producto);
+				break;
+			}
+		}
+		return resultado;
 	}
 
 	@Override
 	public Producto update(int id, Producto pojo) throws Exception {
-		// TODO Auto-generated method stub
-		return null;
+		Producto resultado = null;
+		for (Producto producto : registros) {
+			if (producto.getId() == id){
+				producto = pojo;
+				resultado = producto;
+				break;
+			}
+		}
+		return resultado;
 	}
 
 	@Override
 	public Producto create(Producto pojo) throws Exception {
-		// TODO Auto-generated method stub
-		return null;
+		Producto resultado = null;
+		try {
+			pojo.setId(indice++);
+			registros.add(pojo);
+			resultado = pojo;
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return resultado;
 	}
 	
 	

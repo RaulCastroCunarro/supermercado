@@ -1,6 +1,9 @@
 package com.ipartek.formacion.supermercado.controller.seguridad;
 
+import java.util.List;
 import java.io.IOException;
+import java.util.ArrayList;
+
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -8,6 +11,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.ipartek.formacion.supermercado.modelo.dao.ProductoDAO;
+import com.ipartek.formacion.supermercado.modelo.pojo.Producto;
 
 /**
  * Servlet implementation class ProductosController
@@ -109,29 +113,57 @@ public class ProductosController extends HttpServlet {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} finally {
-			request.getRequestDispatcher(VIEW_TABLA).forward(request, response);
+			request.getRequestDispatcher( vistaSeleccionada).forward(request, response);
 		}
 	}
 
-	private void eliminar(HttpServletRequest request, HttpServletResponse response) {
-		// TODO Auto-generated method stub
-		
+	private void eliminar(HttpServletRequest request, HttpServletResponse response) throws Exception {
+		int id = Integer.parseInt( request.getParameter("id") );
+		dao.delete(id);
+		vistaSeleccionada = VIEW_TABLA;
 	}
 
-	private void guardar(HttpServletRequest request, HttpServletResponse response) {
-		// TODO Auto-generated method stub
+	private void guardar(HttpServletRequest request, HttpServletResponse response) throws Exception {
+		int id = Integer.parseInt( request.getParameter("id") );
+		String nombre = request.getParameter("nombre");
+		float  precio = Float.parseFloat(request.getParameter("precio"));
+		String imagen = request.getParameter("imagen");
+		String descripcion = request.getParameter("descripcion");
+		int descuento = Integer.parseInt(request.getParameter("descuento"));
 		
+		Producto pojo = null;
+		List<Producto> listado = dao.getAll();
+		if(id ==0) {
+			pojo = new Producto(nombre,precio,imagen,descripcion,descuento);
+			dao.create(pojo);
+		}else {
+			for (Producto producto : listado) {
+				if (producto.getId() == id) {
+					producto.setNombre(nombre);
+					producto.setImagen(imagen);
+					producto.setDescripcion(descripcion);
+					producto.setDescuento(descuento);
+					producto.setPrecio(precio);
+				}
+			}
+		}
+		
+		request.setAttribute("productos", dao.getAll());
+		vistaSeleccionada = VIEW_TABLA;
 	}
 
 	private void irFormulario(HttpServletRequest request, HttpServletResponse response) {
-		// TODO Auto-generated method stub
-		
+		Producto productoForm = dao.getById(Integer.parseInt(pId));
+		if (productoForm == null) {
+			productoForm = new Producto();
+		}
+		request.setAttribute("producto", productoForm);
+		vistaSeleccionada = VIEW_FORM;
 	}
 
 	private void listar(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		request.setAttribute("productos", dao.getAll());
-		request.getRequestDispatcher(VIEW_TABLA).forward(request, response);
-		
+		vistaSeleccionada = VIEW_TABLA;
 	}
 
 }

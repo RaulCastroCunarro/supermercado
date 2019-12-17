@@ -35,6 +35,16 @@ public class Producto {
 		this.descripcion = descripcion;
 		this.descuento = descuento;
 	}
+	
+	public Producto(String nombre, float precio, String imagen, String descripcion, int descuento) {
+		super();
+		this.id = 0;
+		this.nombre = nombre;
+		this.precio = precio;
+		this.imagen = imagen;
+		this.descripcion = descripcion;
+		this.descuento = descuento;
+	}
 
 	public int getId() {
 		return id;
@@ -90,7 +100,6 @@ public class Producto {
 		DecimalFormat formato1 = new DecimalFormat("#.00",separador);*/
 		
 		float resultado = (this.precio*(100 - this.descuento))/100;
-		//resultado = Float.parseFloat(formato1.format(resultado));
 		
 		return resultado;
 	}

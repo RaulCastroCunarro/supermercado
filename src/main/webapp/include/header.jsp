@@ -15,7 +15,7 @@
 <meta name="description" content="">
 <meta name="author" content="Ander Uraga">
 <title>Supermercado</title>
-
+<base href="${pageContext.request.contextPath}/">
 <!-- Bootstrap core CSS -->
 <link
 	href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"

@@ -45,11 +45,14 @@ main{
 
  }
 
-
+.img-tabla{
+	width: 5rem;
+	height: 5rem;
+	object-fit: scale-down;
+}
 
 /* producto
 *******************************************/
-
 .producto{
     width: 200px;
     border: 1px solid #F0F0F0;

@@ -19,11 +19,20 @@
 				<div class="col-6 col-md offset-6">
 					<h5>Enlaces de Interes</h5>
 					<ul class="list-unstyled text-small">
-						<li><a class="text-muted" href="politica-privacidad.html">Política de
-								Privacidad</a></li>
-						<li><a class="text-muted" href="localizacion.html">Localización</a></li>
-						<li><a class="text-muted" href="contacto.html">Contacto</a></li>
-					</ul>
+				<li><a class="text-muted" href="politica-privacidad.html">Política
+						de Privacidad</a></li>
+				<li><a class="text-muted"
+					href="https://www.google.com/maps/place/Ipartek+Servicios+Inform%C3%A1ticos/
+					@43.256404,-2.913592,15z/data=!4m5!3m4!1s0x0:0xb671edfb1120ab06!8m2!3d43.
+					256404!4d-2.913592"
+					target="_blank">Localización</a></li>
+				<li class="text-muted">Contacto <a
+					href="https://es-la.facebook.com/pages/Ipartek/169842633053080"
+					target="_blank"><i class="fab fa-facebook-square"></i>
+				</a> <a href="https://twitter.com/ipartekf" target="_blank"><i class="fab fa-twitter-square"></i>
+				</a><a href="https://es.linkedin.com/company/ipartek-formaci-n"
+					rel="external"><i class="fab fa-linkedin"></i></a></li>
+			</ul>
 				</div>
 
 			</div>

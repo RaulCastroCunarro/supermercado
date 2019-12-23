@@ -2,13 +2,14 @@
 
 <%@include file="/include/header.jsp"%>
 
-<h1>Tabla</h1>
 
-<a href="seguridad/productos?accion=formulario&id=0">Nuevo Producto</a>
 
 <div class="card shadow mb-4">
 	<div class="card-header py-3">
-		<h6 class="m-0 font-weight-bold text-center">Perros</h6>
+		<h6 class="m-0 font-weight-bold text-center">
+			<a href="seguridad/productos?accion=formulario&id=0"
+				class="btn btn-primary">Nuevo Producto</a>
+		</h6>
 	</div>
 	<div class="card-body">
 		<div class="table-responsive">
@@ -38,7 +39,7 @@
 					<c:forEach items="${productos}" var="p">
 						<tr>
 							<td>${p.id}</td>
-							<td><img class="img-thumbnail rounded-circle"
+							<td><img class="img-thumbnail rounded-circle img-tabla"
 								src="${p.imagen}"></td>
 							<td>${p.nombre}</td>
 							<td>${p.precio}</td>

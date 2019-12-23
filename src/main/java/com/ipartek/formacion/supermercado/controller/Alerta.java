@@ -4,6 +4,7 @@ public class Alerta {
 	
 	public static final String TIPO_PRIMARY = "primary";
 	public static final String TIPO_DANGER = "danger";
+	public static final String TIPO_WARNING = "warning";
 	
 	private String mensaje;
 	private String tipo;

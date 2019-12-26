@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
 import java.io.IOException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Iterator;
 
@@ -23,24 +24,24 @@ import com.ipartek.formacion.supermercado.controller.Alerta;
 import com.ipartek.formacion.supermercado.modelo.dao.ProductoDAO;
 import com.ipartek.formacion.supermercado.modelo.dao.UsuarioDAO;
 import com.ipartek.formacion.supermercado.modelo.pojo.Producto;
+import com.ipartek.formacion.supermercado.modelo.pojo.Usuario;
 import com.mysql.jdbc.exceptions.MySQLIntegrityConstraintViolationException;
 
 /**
  * Servlet implementation class ProductosController
  */
-@WebServlet("/seguridad/productos")
-public class ProductosController extends HttpServlet {
+@WebServlet("/seguridad/usuarios")
+public class UsuariosController extends HttpServlet {
 	private static final long serialVersionUID = 1L;
-	private final static Logger LOG = Logger.getLogger(ProductosController.class);
-	
-	
-	private static final String VIEW_TABLA = "productos/index.jsp";
-	private static final String VIEW_FORM = "productos/formulario.jsp";
+	private final static Logger LOG = Logger.getLogger(UsuariosController.class);
+
+	private static final String VIEW_TABLA = "usuarios/index.jsp";
+	private static final String VIEW_FORM = "usuarios/formulario.jsp";
 	private static final int MIN_CAR = 2;
 	private static final int MAX_CAR = 150;
 	private static String FORWARD = VIEW_TABLA;
 
-	private static ProductoDAO dao;
+	private static UsuarioDAO dao;
 
 	public static final String ACCION_LISTAR = "listar";
 	public static final String ACCION_FORM = "formulario";
@@ -58,15 +59,17 @@ public class ProductosController extends HttpServlet {
 
 	String pId = "";
 	String pNombre = "";
-	String pPrecio = "";
+	String pContrasenia = "";
+	String pEmail = "";
 	String pImagen = "";
-	String pDescripcion = "";
-	String pDescuento = "";
+	String pFechaCreacion = "";
+	String pFechaModificacion = "";
+	String pFechaEliminacion = "";
 
 	@Override
 	public void init() throws ServletException {
 		super.init();
-		dao = ProductoDAO.getInstance();
+		dao = UsuarioDAO.getInstance();
 		// Crear Factoria y Validador
 		factory = Validation.buildDefaultValidatorFactory();
 		validator = factory.getValidator();
@@ -147,30 +150,30 @@ public class ProductosController extends HttpServlet {
 		String vista = "";
 		if (destino.equals(VIEW_FORM)) {
 			int id;
-			Producto productoForm = null;
+			Usuario usuarioForm = null;
 			try {
 				id = Integer.parseInt(request.getParameter("id"));
 
 				if (pId != null) {
-					productoForm = dao.getById(id);
+					usuarioForm = dao.getById(id);
 				}
 
-				if (productoForm == null) {
-					productoForm = new Producto();
+				if (usuarioForm == null) {
+					usuarioForm = new Usuario();
 				}
 			} catch (NumberFormatException e) {
-				if (productoForm == null) {
-					productoForm = new Producto();
+				if (usuarioForm == null) {
+					usuarioForm = new Usuario();
 				}
 			}
 
-			request.setAttribute("producto", productoForm);
+			request.setAttribute("usuario", usuarioForm);
 
 			vista = destino;
 		}
 
 		if (destino.equals(VIEW_TABLA)) {
-			request.setAttribute("productos", dao.getAll());
+			request.setAttribute("usuarios", dao.getAll());
 			vista = destino;
 		}
 		return vista;
@@ -179,10 +182,12 @@ public class ProductosController extends HttpServlet {
 	private void doRecogerDatos(HttpServletRequest request, HttpServletResponse response) {
 		pId = request.getParameter("id");
 		pNombre = request.getParameter("nombre");
-		pPrecio = request.getParameter("precio");
+		pContrasenia = request.getParameter("contrasenia");
+		pEmail = request.getParameter("email");
 		pImagen = request.getParameter("imagen");
-		pDescripcion = request.getParameter("descripcion");
-		pDescuento = request.getParameter("descuento");
+		pFechaCreacion = request.getParameter("fecha-creacion");
+		pFechaModificacion = request.getParameter("fecha-modificacion");
+		pFechaEliminacion = request.getParameter("fecha-eliminacion");
 
 	}
 
@@ -194,16 +199,28 @@ public class ProductosController extends HttpServlet {
 	}
 
 	private void guardar(HttpServletRequest request, HttpServletResponse response) throws Exception {
-		Producto pGuardar = new Producto(Integer.parseInt(pId), pNombre, Float.parseFloat(pPrecio), pImagen,
-				pDescripcion, Integer.parseInt(pDescuento));
+		Timestamp fechaMod = null;
+		Timestamp fechaElim = null;
+		
+		if (pFechaModificacion != null) {
+			fechaMod = Timestamp.valueOf(pFechaModificacion);
+		}
+		
+		if (pFechaEliminacion != null) {
+			fechaElim = Timestamp.valueOf(pFechaEliminacion);
+		}
+		
+		Usuario pGuardar = new Usuario(Integer.parseInt(pId), pNombre, pContrasenia, pEmail, pImagen,
+				Timestamp.valueOf(pFechaCreacion), fechaMod,
+				fechaElim);
 
 		validator.validate(pGuardar);
 
 		// Obtener las ConstrainViolation
-		Set<ConstraintViolation<Producto>> violations = validator.validate(pGuardar);
+		Set<ConstraintViolation<Usuario>> violations = validator.validate(pGuardar);
 		if (violations.size() > 0) {
 			/* No ha pasado la valiadacion, iterar sobre los mensajes de validacion */
-			for (ConstraintViolation<Producto> cv : violations) {
+			for (ConstraintViolation<Usuario> cv : violations) {
 				char[] caracteres = cv.getPropertyPath().toString().toCharArray();
 				caracteres[0] = Character.toUpperCase(caracteres[0]);
 				String campo = "";
@@ -217,25 +234,29 @@ public class ProductosController extends HttpServlet {
 		} else {
 			int id = Integer.parseInt(pId);
 			String nombre = pNombre;
-			float precio = Float.parseFloat(pPrecio);
+			String contrasenia = pContrasenia;
+			String email = pEmail;
 			String imagen = pImagen;
-			String descripcion = pDescripcion;
-			int descuento = Integer.parseInt(pDescuento);
+			Timestamp fechaCreacion = Timestamp.valueOf(pFechaCreacion);
+			Timestamp fechaModificacion = Timestamp.valueOf(pFechaModificacion);
+			Timestamp fechaEliminacion = Timestamp.valueOf(pFechaEliminacion);
 
-			Producto pojo = null;
-			List<Producto> listado = dao.getAll();
+			Usuario pojo = null;
+			List<Usuario> listado = dao.getAll();
 			if (id == 0) {
-				pojo = new Producto(nombre, precio, imagen, descripcion, descuento);
+				pojo = new Usuario(id, nombre, contrasenia, email, imagen, fechaCreacion, fechaModificacion, fechaEliminacion);
 				dao.create(pojo);
 			} else {
-				for (Producto producto : listado) {
-					if (producto.getId() == id) {
-						producto.setNombre(nombre);
-						producto.setImagen(imagen);
-						producto.setDescripcion(descripcion);
-						producto.setDescuento(descuento);
-						producto.setPrecio(precio);
-						dao.update(producto.getId(), producto);
+				for (Usuario usuario : listado) {
+					if (usuario.getId() == id) {
+						usuario.setNombre(nombre);
+						usuario.setContrasenia(contrasenia);
+						usuario.setEmail(email);
+						usuario.setImagen(imagen);
+						usuario.setFechaCreacion(fechaCreacion);
+						usuario.setFechaModificacion(fechaModificacion);
+						usuario.setFechaEliminacion(fechaEliminacion);
+						dao.update(usuario.getId(), usuario);
 					}
 				}
 			}
@@ -246,22 +267,22 @@ public class ProductosController extends HttpServlet {
 	}
 
 	private void irFormulario(HttpServletRequest request, HttpServletResponse response) {
-		Producto productoForm = null;
+		Usuario usuarioForm = null;
 
 		if (pId != null) {
-			productoForm = dao.getById(Integer.parseInt(pId));
+			usuarioForm = dao.getById(Integer.parseInt(pId));
 		}
 
-		if (productoForm == null) {
-			productoForm = new Producto();
+		if (usuarioForm == null) {
+			usuarioForm = new Usuario();
 		}
-		request.setAttribute("producto", productoForm);
+		request.setAttribute("usuario", usuarioForm);
 		mensajes.clear();
 		vistaSeleccionada = operacionesVista(request, response, VIEW_FORM);
 	}
 
 	private void listar(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		request.setAttribute("productos", dao.getAll());
+		request.setAttribute("usuarios", dao.getAll());
 		mensajes.clear();
 		vistaSeleccionada = operacionesVista(request, response, VIEW_TABLA);
 	}

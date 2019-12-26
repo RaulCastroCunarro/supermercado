@@ -1,5 +1,7 @@
 package com.ipartek.formacion.supermercado.modelo.pojo;
 
+import java.sql.Timestamp;
+
 import javax.validation.constraints.Digits;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
@@ -38,6 +40,14 @@ public class Producto {
 	@Range(min=0, max=100, message="debe estar entre 0 y 100")
 	private int descuento;
 	
+	@NotNull
+	private Timestamp fechaCreacion;
+	
+	@NotNull
+	private Timestamp fechaModificacion;
+	
+	@NotNull
+	private Timestamp fechaEliminacion;
 	
 	public Producto() {
 		super();
@@ -117,10 +127,31 @@ public class Producto {
 		this.descuento = descuento;
 	}
 	
+	public Timestamp getFechaCreacion() {
+		return fechaCreacion;
+	}
+
+	public void setFechaCreacion(Timestamp fechaCreacion) {
+		this.fechaCreacion = fechaCreacion;
+	}
+
+	public Timestamp getFechaModificacion() {
+		return fechaModificacion;
+	}
+
+	public void setFechaModificacion(Timestamp fechaModificacion) {
+		this.fechaModificacion = fechaModificacion;
+	}
+
+	public Timestamp getFechaEliminacion() {
+		return fechaEliminacion;
+	}
+
+	public void setFechaEliminacion(Timestamp fechaEliminacion) {
+		this.fechaEliminacion = fechaEliminacion;
+	}
+
 	public float getPrecioDescuento() {
-		/*DecimalFormatSymbols separador = new DecimalFormatSymbols();
-		separador.setDecimalSeparator('.');
-		DecimalFormat formato1 = new DecimalFormat("#.00",separador);*/
 		
 		float resultado = (this.precio*(100 - this.descuento))/100;
 		

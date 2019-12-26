@@ -1,27 +1,64 @@
 package com.ipartek.formacion.supermercado.modelo.pojo;
 
 import java.sql.Timestamp;
+import java.util.Calendar;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
+
+import org.hibernate.validator.constraints.NotBlank;
 
 public class Usuario {
+
+	@NotNull
 	private int id;
+
+	@NotNull
+	@NotBlank
+	@Size(min = 2, max = 150, message = "tiene que tener entre 2 y 150 caracteres")
 	private String nombre;
-	private String password;
+
+	@NotNull
+	@NotBlank
+	@Size(min = 2, max = 150, message = "tiene que tener entre 2 y 150 caracteres")
+	private String contrasenia;
+
+	@NotNull
 	private String email;
+
+	@Pattern(regexp = "(http(s?):)([/|.|\\w|\\s|-])*\\.(?:jpg|gif|png)", message = "debe ser una URL valida")
 	private String imagen;
+
+	@NotNull
 	private Timestamp fechaCreacion;
+
+	private Timestamp fechaModificacion;
+
 	private Timestamp fechaEliminacion;
-	
+
 	public Usuario() {
 		super();
+		id = 0;
+		nombre = "Default";
+		contrasenia = "";
+		email = "";
+		imagen = "http://emser.es/wp-content/uploads/2016/08/usuario-sin-foto.png";
+		fechaCreacion = null;
+		fechaModificacion = null;
+		fechaEliminacion = null;
 	}
 
-	public Usuario(int id, String nombre, String password, String email, String imagen) {
+	public Usuario(int id, String nombre, String password, String email, String imagen, Timestamp fechaCreacion,
+			Timestamp fechaModificacion, Timestamp fechaEliminacion) {
 		super();
 		this.id = id;
 		this.nombre = nombre;
-		this.password = password;
+		this.contrasenia = password;
 		this.email = email;
 		this.imagen = imagen;
+		this.fechaCreacion = fechaCreacion;
+		this.fechaModificacion = fechaModificacion;
+		this.fechaEliminacion = fechaEliminacion;
 	}
 
 	public int getId() {
@@ -40,12 +77,12 @@ public class Usuario {
 		this.nombre = nombre;
 	}
 
-	public String getPassword() {
-		return password;
+	public String getContrasenia() {
+		return contrasenia;
 	}
 
-	public void setPassword(String password) {
-		this.password = password;
+	public void setContrasenia(String contrasenia) {
+		this.contrasenia = contrasenia;
 	}
 
 	public String getEmail() {
@@ -72,6 +109,14 @@ public class Usuario {
 		this.fechaCreacion = fechaCreacion;
 	}
 
+	public Timestamp getFechaModificacion() {
+		return fechaModificacion;
+	}
+
+	public void setFechaModificacion(Timestamp fechaModificacion) {
+		this.fechaModificacion = fechaModificacion;
+	}
+
 	public Timestamp getFechaEliminacion() {
 		return fechaEliminacion;
 	}
@@ -82,11 +127,9 @@ public class Usuario {
 
 	@Override
 	public String toString() {
-		return "Usuario [id=" + id + ", nombre=" + nombre + ", password=" + password + ", email=" + email + ", imagen="
-				+ imagen + ", fechaCreacion=" + fechaCreacion + ", fechaEliminacion=" + fechaEliminacion + "]";
+		return "Usuario [id=" + id + ", nombre=" + nombre + ", contrasenia=" + contrasenia + ", email=" + email
+				+ ", imagen=" + imagen + ", fechaCreacion=" + fechaCreacion + ", fechaModificacion=" + fechaModificacion
+				+ ", fechaEliminacion=" + fechaEliminacion + "]";
 	}
 
-	
-	
-	
 }

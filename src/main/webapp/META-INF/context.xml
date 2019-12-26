@@ -7,8 +7,8 @@
 		maxWait="10000" 
 		name="jdbc/mydb"	 
 		type="javax.sql.DataSource"
-		url="jdbc:mysql://localhost:3306/supermercado" 
-		username="pepe"
-		password="pepe" 
+		url="jdbc:mysql://localhost:3306/rupermercado" 
+		username="root"
+		password="" 
 		/>
 </Context>

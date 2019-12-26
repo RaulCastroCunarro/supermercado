@@ -8,6 +8,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.log4j.Logger;
 import org.jsoup.Jsoup;
 import org.jsoup.safety.Whitelist;
 
@@ -15,14 +16,16 @@ import com.ipartek.formacion.supermercado.modelo.ConnectionManager;
 import com.ipartek.formacion.supermercado.modelo.pojo.Producto;
 
 public class ProductoDAO implements IDAO<Producto> {
+	private final static Logger LOG = Logger.getLogger(ProductoDAO.class);
 
 	private static ProductoDAO INSTANCE;
 
-	private static final String SQL_GET_ALL = "SELECT id, nombre, imagen, precio, descuento, descripcion FROM producto ORDER BY id DESC LIMIT 500;";
+	private static final String SQL_GET_ALL = "SELECT id, nombre, imagen, precio, descuento, descripcion FROM producto WHERE fecha_eliminacion IS NULL ORDER BY id DESC LIMIT 500;";
 	private static final String SQL_GET_BY_ID = "SELECT id, nombre, imagen, precio, descuento, descripcion FROM producto WHERE id = ?;";
-	private static final String SQL_INSERT = "INSERT INTO producto (id, nombre, imagen, precio, descuento, descripcion) VALUES ( ? , ?, ?, ?, ?, ?);";
+	private static final String SQL_INSERT = "INSERT INTO producto (id, nombre, imagen, precio, descuento, descripcion, fecha_creacion) VALUES ( ? , ?, ?, ?, ?, ?, CURRENT_TIMESTAMP());";
 	private static final String SQL_UPDATE = "UPDATE producto SET nombre= ?, imagen=?, precio=?, descuento=?, descripcion=? WHERE id = ?;";
 	private static final String SQL_DELETE = "DELETE FROM producto WHERE id = ?;";
+	private static final String SQL_DELETE_LOGICO = "UPDATE producto SET fecha_eliminacion = CURRENT_TIMESTAMP() WHERE id = ?;";
 
 	private ProductoDAO() {
 		super();
@@ -82,6 +85,26 @@ public class ProductoDAO implements IDAO<Producto> {
 
 	@Override
 	public Producto delete(int id) throws Exception {
+		Producto resultado = null;
+
+		try (Connection con = ConnectionManager.getConnection();
+				PreparedStatement pst = con.prepareStatement(SQL_DELETE_LOGICO);) {
+
+			pst.setInt(1, id);
+
+			int affectedRows = pst.executeUpdate();
+			if (affectedRows == 1) {
+				resultado = getById(id);
+			}
+
+		} catch (Exception e) {
+			LOG.error(e);
+		}
+
+		return resultado;
+	}
+	
+	public Producto deleteFinal(int id) throws Exception {
 		Producto resultado = null;
 
 		try (Connection con = ConnectionManager.getConnection();

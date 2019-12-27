@@ -23,6 +23,7 @@ import com.ipartek.formacion.supermercado.controller.Alerta;
 import com.ipartek.formacion.supermercado.modelo.dao.ProductoDAO;
 import com.ipartek.formacion.supermercado.modelo.dao.UsuarioDAO;
 import com.ipartek.formacion.supermercado.modelo.pojo.Producto;
+import com.ipartek.formacion.supermercado.modelo.pojo.Usuario;
 import com.mysql.jdbc.exceptions.MySQLIntegrityConstraintViolationException;
 
 /**
@@ -41,6 +42,7 @@ public class ProductosController extends HttpServlet {
 	private static String FORWARD = VIEW_TABLA;
 
 	private static ProductoDAO dao;
+	private static UsuarioDAO daoUsuario;
 
 	public static final String ACCION_LISTAR = "listar";
 	public static final String ACCION_FORM = "formulario";
@@ -62,6 +64,7 @@ public class ProductosController extends HttpServlet {
 	String pImagen = "";
 	String pDescripcion = "";
 	String pDescuento = "";
+	Usuario pUsuario = null;
 
 	@Override
 	public void init() throws ServletException {
@@ -183,7 +186,7 @@ public class ProductosController extends HttpServlet {
 		pImagen = request.getParameter("imagen");
 		pDescripcion = request.getParameter("descripcion");
 		pDescuento = request.getParameter("descuento");
-
+		pUsuario = daoUsuario.getById(Integer.parseInt(request.getParameter("usuario")));
 	}
 
 	private void eliminar(HttpServletRequest request, HttpServletResponse response) throws Exception {
@@ -194,8 +197,14 @@ public class ProductosController extends HttpServlet {
 	}
 
 	private void guardar(HttpServletRequest request, HttpServletResponse response) throws Exception {
-		Producto pGuardar = new Producto(Integer.parseInt(pId), pNombre, Float.parseFloat(pPrecio), pImagen,
-				pDescripcion, Integer.parseInt(pDescuento));
+		
+		Producto pGuardar = new Producto(Integer.parseInt(pId), 
+											pNombre, 
+											Float.parseFloat(pPrecio), 
+											pImagen,
+											pDescripcion, 
+											Integer.parseInt(pDescuento), 
+											pUsuario);
 
 		validator.validate(pGuardar);
 

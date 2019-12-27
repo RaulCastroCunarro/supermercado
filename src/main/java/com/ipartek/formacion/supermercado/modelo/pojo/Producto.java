@@ -49,6 +49,9 @@ public class Producto {
 	@NotNull
 	private Timestamp fechaEliminacion;
 	
+	@NotNull
+	private Usuario usuario;
+	
 	public Producto() {
 		super();
 		this.id = 0;
@@ -57,9 +60,10 @@ public class Producto {
 		this.imagen = "https://image.flaticon.com/icons/png/512/372/372627.png";
 		this.descripcion = "";
 		this.descuento = DESCUENTO_MIN;
+		this.usuario = new Usuario();
 	}
 
-	public Producto(int id, String nombre, float precio, String imagen, String descripcion, int descuento) {
+	public Producto(int id, String nombre, float precio, String imagen, String descripcion, int descuento, Usuario usuario) {
 		super();
 		this.id = id;
 		this.nombre = nombre;
@@ -67,6 +71,7 @@ public class Producto {
 		this.imagen = imagen;
 		this.descripcion = descripcion;
 		this.descuento = descuento;
+		this.usuario = usuario;
 	}
 	
 	public Producto(String nombre, float precio, String imagen, String descripcion, int descuento) {
@@ -150,6 +155,14 @@ public class Producto {
 	public void setFechaEliminacion(Timestamp fechaEliminacion) {
 		this.fechaEliminacion = fechaEliminacion;
 	}
+	
+	public Usuario getUsuario() {
+		return usuario;
+	}
+
+	public void setUsuario(Usuario usuario) {
+		this.usuario = usuario;
+	}
 
 	public float getPrecioDescuento() {
 		
@@ -161,7 +174,9 @@ public class Producto {
 	@Override
 	public String toString() {
 		return "Producto [id=" + id + ", nombre=" + nombre + ", precio=" + precio + ", imagen=" + imagen
-				+ ", descripcion=" + descripcion + ", descuento=" + descuento + "]";
+				+ ", descripcion=" + descripcion + ", descuento=" + descuento + ", fechaCreacion=" + fechaCreacion
+				+ ", fechaModificacion=" + fechaModificacion + ", fechaEliminacion=" + fechaEliminacion + ", usuario="
+				+ usuario + "]";
 	}
 	
 	

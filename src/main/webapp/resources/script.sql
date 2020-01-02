@@ -11,36 +11,12 @@
 /*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 
--- Volcando estructura para tabla rupermercado.usuario
-DROP TABLE IF EXISTS `usuario`;
-CREATE TABLE IF NOT EXISTS `usuario` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `nombre` varchar(50) NOT NULL DEFAULT 'Default',
-  `contrasenia` varchar(50) NOT NULL,
-  `email` varchar(50) DEFAULT NULL,
-  `imagen` varchar(250) NOT NULL DEFAULT 'http://emser.es/wp-content/uploads/2016/08/usuario-sin-foto.png',
-  `fecha_creacion` timestamp NOT NULL DEFAULT current_timestamp(),
-  `fecha_modificacion` timestamp NULL DEFAULT NULL ON UPDATE current_timestamp(),
-  `fecha_eliminacion` timestamp NULL DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `nombre` (`nombre`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8;
-
--- Volcando datos para la tabla rupermercado.usuario: ~2 rows (aproximadamente)
-DELETE FROM `usuario`;
-/*!40000 ALTER TABLE `usuario` DISABLE KEYS */;
-INSERT INTO `usuario` (`id`, `nombre`, `contrasenia`, `email`, `imagen`, `fecha_creacion`, `fecha_modificacion`, `fecha_eliminacion`) VALUES
-	(1, 'admin', '123456', 'admin@ipartek.es', 'http://emser.es/wp-content/uploads/2016/08/usuario-sin-foto.png', '2019-12-26 13:09:12', NULL, NULL),
-	(2, 'pepe', 'pepe', 'pepe@ipartek.es', 'http://emser.es/wp-content/uploads/2016/08/usuario-sin-foto.png', '2019-12-26 13:09:12', NULL, NULL);
-/*!40000 ALTER TABLE `usuario` ENABLE KEYS */;
 
 -- Volcando estructura de base de datos para rupermercado
-DROP DATABASE IF EXISTS `rupermercado`;
 CREATE DATABASE IF NOT EXISTS `rupermercado` /*!40100 DEFAULT CHARACTER SET utf8 */;
 USE `rupermercado`;
 
 -- Volcando estructura para tabla rupermercado.producto
-DROP TABLE IF EXISTS `producto`;
 CREATE TABLE IF NOT EXISTS `producto` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `nombre` varchar(50) NOT NULL,
@@ -64,11 +40,50 @@ INSERT INTO `producto` (`id`, `nombre`, `precio`, `imagen`, `descripcion`, `desc
 	(1, 'Cafe', 20, 'https://as01.epimg.net/deporteyvida/imagenes/2018/06/19/portada/1529402043_039778_1529402207_noticia_normal.jpg', 'Es un cafe con elche', 5, '2019-12-26 13:09:39', NULL, NULL, 1),
 	(2, 'Leche', 80, 'https://upload.wikimedia.org/wikipedia/commons/0/0e/Milk_glass.jpg', 'Una montaña recien recolectada de nuestros ganaderos locales.', 10, '2019-12-26 13:09:39', NULL, NULL, 1),
 	(3, 'Pan', 9, 'http://www.hacerpan.net/ImagenesHacerPan/ImagenesHacerPan/pan_trigo.jpg', 'Hola', 15, '2019-12-26 13:09:39', NULL, NULL, 1),
-	(4, 'Patatas', 3.4, 'https://multisac.es/wp-content/uploads/2018/01/Saco-de-Rafia-trasparente-Marcado-Patata-de-Consumo.png', 'Patatas alavesas', 25, '2019-12-26 13:09:39', NULL, NULL, 1),
+	(4, 'Patatas', 3.4, 'https://multisac.es/wp-content/uploads/2018/01/Saco-de-Rafia-trasparente-Marcado-Patata-de-Consumo.png', 'Patatas alavesas', 25, '2019-12-26 13:09:39', '2020-01-02 08:34:44', NULL, 2),
 	(5, 'Posn', 0, 'https://cdn.shopify.com/s/files/1/0229/0839/files/Untitled_design__1.png?2393&format=jpg&quality=90&width=1024', 'Un posn muy rico ñam ñam', 30, '2019-12-26 13:09:39', NULL, NULL, 1);
 /*!40000 ALTER TABLE `producto` ENABLE KEYS */;
 
+-- Volcando estructura para tabla rupermercado.rol
+CREATE TABLE IF NOT EXISTS `rol` (
+  `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '1:Usuario normal 2:Administrador',
+  `nombre` varchar(15) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `nombre` (`nombre`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
 
+-- Volcando datos para la tabla rupermercado.rol: ~2 rows (aproximadamente)
+DELETE FROM `rol`;
+/*!40000 ALTER TABLE `rol` DISABLE KEYS */;
+INSERT INTO `rol` (`id`, `nombre`) VALUES
+	(2, 'administrador'),
+	(1, 'usuario');
+/*!40000 ALTER TABLE `rol` ENABLE KEYS */;
+
+-- Volcando estructura para tabla rupermercado.usuario
+CREATE TABLE IF NOT EXISTS `usuario` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `nombre` varchar(50) NOT NULL DEFAULT 'Default',
+  `contrasenia` varchar(50) NOT NULL,
+  `email` varchar(50) DEFAULT NULL,
+  `imagen` varchar(250) NOT NULL DEFAULT 'http://emser.es/wp-content/uploads/2016/08/usuario-sin-foto.png',
+  `fecha_creacion` timestamp NOT NULL DEFAULT current_timestamp(),
+  `fecha_modificacion` timestamp NULL DEFAULT NULL ON UPDATE current_timestamp(),
+  `fecha_eliminacion` timestamp NULL DEFAULT NULL,
+  `id_rol` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `nombre` (`nombre`),
+  KEY `FK_rol` (`id_rol`),
+  CONSTRAINT `FK_rol` FOREIGN KEY (`id_rol`) REFERENCES `rol` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8;
+
+-- Volcando datos para la tabla rupermercado.usuario: ~2 rows (aproximadamente)
+DELETE FROM `usuario`;
+/*!40000 ALTER TABLE `usuario` DISABLE KEYS */;
+INSERT INTO `usuario` (`id`, `nombre`, `contrasenia`, `email`, `imagen`, `fecha_creacion`, `fecha_modificacion`, `fecha_eliminacion`, `id_rol`) VALUES
+	(1, 'admin', '123456', 'admin@ipartek.es', 'http://emser.es/wp-content/uploads/2016/08/usuario-sin-foto.png', '2019-12-26 13:09:12', '2020-01-02 11:16:37', NULL, 2),
+	(2, 'pepe', 'pepe', 'pepe@ipartek.es', 'http://emser.es/wp-content/uploads/2016/08/usuario-sin-foto.png', '2019-12-26 13:09:12', '2020-01-02 11:16:41', NULL, 1);
+/*!40000 ALTER TABLE `usuario` ENABLE KEYS */;
 
 /*!40101 SET SQL_MODE=IFNULL(@OLD_SQL_MODE, '') */;
 /*!40014 SET FOREIGN_KEY_CHECKS=IF(@OLD_FOREIGN_KEY_CHECKS IS NULL, 1, @OLD_FOREIGN_KEY_CHECKS) */;

@@ -26,6 +26,7 @@ import com.ipartek.formacion.supermercado.modelo.dao.ProductoDAO;
 import com.ipartek.formacion.supermercado.modelo.dao.RolDAO;
 import com.ipartek.formacion.supermercado.modelo.dao.UsuarioDAO;
 import com.ipartek.formacion.supermercado.modelo.pojo.Producto;
+import com.ipartek.formacion.supermercado.modelo.pojo.Rol;
 import com.ipartek.formacion.supermercado.modelo.pojo.Usuario;
 import com.mysql.jdbc.exceptions.MySQLIntegrityConstraintViolationException;
 
@@ -68,6 +69,7 @@ public class UsuariosController extends HttpServlet {
 	String pFechaCreacion = "";
 	String pFechaModificacion = "";
 	String pFechaEliminacion = "";
+	String pRol = "";
 
 	@Override
 	public void init() throws ServletException {
@@ -209,8 +211,16 @@ public class UsuariosController extends HttpServlet {
 	}
 
 	private void guardar(HttpServletRequest request, HttpServletResponse response) throws Exception {
+		Timestamp fechaCrea = null;
 		Timestamp fechaMod = null;
 		Timestamp fechaElim = null;
+		Rol rol = null;
+		
+		if (pFechaCreacion != null) {
+			fechaCrea = Timestamp.valueOf(pFechaCreacion);
+		}else {
+			fechaCrea = new Timestamp(System.currentTimeMillis());
+		}
 		
 		if (pFechaModificacion != null) {
 			fechaMod = Timestamp.valueOf(pFechaModificacion);
@@ -218,6 +228,12 @@ public class UsuariosController extends HttpServlet {
 		
 		if (pFechaEliminacion != null) {
 			fechaElim = Timestamp.valueOf(pFechaEliminacion);
+		}
+		
+		if (pRol != null) {
+			rol = daoRol.getById(Integer.parseInt(pRol));
+		}else {
+			rol = new Rol();
 		}
 		
 		Usuario pGuardar = new Usuario(Integer.parseInt(pId), pNombre, pContrasenia, pEmail, pImagen,
@@ -250,7 +266,6 @@ public class UsuariosController extends HttpServlet {
 			Timestamp fechaCreacion = Timestamp.valueOf(pFechaCreacion);
 			Timestamp fechaModificacion = Timestamp.valueOf(pFechaModificacion);
 			Timestamp fechaEliminacion = Timestamp.valueOf(pFechaEliminacion);
-			Rol rol = 
 			
 			HttpSession session = request.getSession();
 			Usuario usuarioSesion = (Usuario)session.getAttribute("usuarioLogeado");

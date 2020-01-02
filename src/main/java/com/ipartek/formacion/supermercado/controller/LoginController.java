@@ -17,6 +17,7 @@ import org.apache.log4j.Logger;
 
 import com.ipartek.formacion.supermercado.modelo.dao.ProductoDAO;
 import com.ipartek.formacion.supermercado.modelo.dao.UsuarioDAO;
+import com.ipartek.formacion.supermercado.modelo.pojo.Rol;
 import com.ipartek.formacion.supermercado.modelo.pojo.Usuario;
 
 /**
@@ -78,8 +79,13 @@ public class LoginController extends HttpServlet {
 				HttpSession sesion = request.getSession();
 				sesion.setAttribute("usuarioLogeado", usuario);
 				sesion.setMaxInactiveInterval(-1/* 60*3 */);
-
-				view = "seguridad/index.jsp";
+				
+				if (usuario.getRol().getId() == Rol.ROL_ADMINISTRADOR) {
+					view = "seguridad/index.jsp"; //accedemos al BACK-OFFICE
+				}else {
+					view = "mipanel/index.jsp"; //accedemos al BACK-OFFICE
+				}
+				
 			} else {
 				mensajes.add(new Alerta("Datos incorrectos", Alerta.TIPO_DANGER));
 				request.setAttribute("mensajesAlerta", mensajes);

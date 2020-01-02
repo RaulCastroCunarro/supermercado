@@ -7,7 +7,7 @@
 <div class="card shadow mb-4">
 	<div class="card-header py-3">
 		<h6 class="m-0 font-weight-bold text-center">
-			<a href="seguridad/productos?accion=formulario&id=0"
+			<a href="mipanel/productos?accion=formulario&id=0"
 				class="btn btn-primary">Nuevo Producto</a>
 		</h6>
 	</div>
@@ -23,7 +23,6 @@
 						<th>Precio</th>
 						<th>Descripción</th>
 						<th>Descuento</th>
-						<th>Usuario</th>
 					</tr>
 				</thead>
 				<tfoot>
@@ -34,7 +33,6 @@
 						<th>Precio</th>
 						<th>Descripción</th>
 						<th>Descuento</th>
-						<th>Usuario</th>
 					</tr>
 				</tfoot>
 				<tbody>
@@ -47,9 +45,8 @@
 							<td>${p.precio}</td>
 							<td>${p.descripcion}</td>
 							<td>${p.descuento}</td>
-							<td>${p.usuario.nombre}</td>
 							<td><a
-								href="seguridad/productos?accion=formulario&id=${p.id}">Editar</a></td>
+								href="mipanel/productos?accion=formulario&id=${p.id}">Editar</a></td>
 						</tr>
 					</c:forEach>
 				</tbody>

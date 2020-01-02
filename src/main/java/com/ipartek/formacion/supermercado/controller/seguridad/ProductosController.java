@@ -33,15 +33,14 @@ import com.mysql.jdbc.exceptions.MySQLIntegrityConstraintViolationException;
 public class ProductosController extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	private final static Logger LOG = Logger.getLogger(ProductosController.class);
-	
-	
+
 	private static final String VIEW_TABLA = "productos/index.jsp";
 	private static final String VIEW_FORM = "productos/formulario.jsp";
 	private static final int MIN_CAR = 2;
 	private static final int MAX_CAR = 150;
 	private static String FORWARD = VIEW_TABLA;
 
-	private static ProductoDAO dao;
+	private static ProductoDAO daoProducto;
 	private static UsuarioDAO daoUsuario;
 
 	public static final String ACCION_LISTAR = "listar";
@@ -69,7 +68,8 @@ public class ProductosController extends HttpServlet {
 	@Override
 	public void init() throws ServletException {
 		super.init();
-		dao = ProductoDAO.getInstance();
+		daoProducto = ProductoDAO.getInstance();
+		daoUsuario = UsuarioDAO.getInstance();
 		// Crear Factoria y Validador
 		factory = Validation.buildDefaultValidatorFactory();
 		validator = factory.getValidator();
@@ -78,7 +78,8 @@ public class ProductosController extends HttpServlet {
 	@Override
 	public void destroy() {
 		super.destroy();
-		dao = null;
+		daoProducto = null;
+		daoUsuario = null;
 		factory = null;
 		validator = null;
 	}
@@ -107,7 +108,7 @@ public class ProductosController extends HttpServlet {
 		// recoger parametros
 		String pAccion = request.getParameter("accion");
 
-		doRecogerDatos(request, response);
+		mapper(request, response);
 
 		try {
 			// TODO log
@@ -133,7 +134,7 @@ public class ProductosController extends HttpServlet {
 				break;
 			}
 
-			request.setAttribute("productos", dao.getAll());
+			request.setAttribute("productos", daoProducto.getAll());
 		} catch (MySQLIntegrityConstraintViolationException e) {
 			mensajes.add(new Alerta("El nombre de ese producto ya existe.", Alerta.TIPO_DANGER));
 		} catch (Exception e) {
@@ -155,7 +156,7 @@ public class ProductosController extends HttpServlet {
 				id = Integer.parseInt(request.getParameter("id"));
 
 				if (pId != null) {
-					productoForm = dao.getById(id);
+					productoForm = daoProducto.getById(id);
 				}
 
 				if (productoForm == null) {
@@ -167,44 +168,44 @@ public class ProductosController extends HttpServlet {
 				}
 			}
 
+			request.setAttribute("usuarios", daoUsuario.getAll());
 			request.setAttribute("producto", productoForm);
 
 			vista = destino;
 		}
 
 		if (destino.equals(VIEW_TABLA)) {
-			request.setAttribute("productos", dao.getAll());
+			request.setAttribute("productos", daoProducto.getAll());
 			vista = destino;
 		}
 		return vista;
 	}
 
-	private void doRecogerDatos(HttpServletRequest request, HttpServletResponse response) {
+	private void mapper(HttpServletRequest request, HttpServletResponse response) {
 		pId = request.getParameter("id");
 		pNombre = request.getParameter("nombre");
 		pPrecio = request.getParameter("precio");
 		pImagen = request.getParameter("imagen");
 		pDescripcion = request.getParameter("descripcion");
 		pDescuento = request.getParameter("descuento");
-		pUsuario = daoUsuario.getById(Integer.parseInt(request.getParameter("usuario")));
+		if (request.getParameter("usuario") == null) {
+			if (request.getParameter("idUsuario") != null) {
+				pUsuario = daoUsuario.getById(Integer.parseInt(request.getParameter("idUsuario")));
+			}
+		}
 	}
 
 	private void eliminar(HttpServletRequest request, HttpServletResponse response) throws Exception {
 		int id = Integer.parseInt(request.getParameter("id"));
-		dao.delete(id);
+		daoProducto.delete(id);
 		mensajes.clear();
 		vistaSeleccionada = operacionesVista(request, response, VIEW_TABLA);
 	}
 
 	private void guardar(HttpServletRequest request, HttpServletResponse response) throws Exception {
-		
-		Producto pGuardar = new Producto(Integer.parseInt(pId), 
-											pNombre, 
-											Float.parseFloat(pPrecio), 
-											pImagen,
-											pDescripcion, 
-											Integer.parseInt(pDescuento), 
-											pUsuario);
+
+		Producto pGuardar = new Producto(Integer.parseInt(pId), pNombre, Float.parseFloat(pPrecio), pImagen,
+				pDescripcion, Integer.parseInt(pDescuento), pUsuario);
 
 		validator.validate(pGuardar);
 
@@ -222,6 +223,7 @@ public class ProductosController extends HttpServlet {
 
 				mensajes.add(new Alerta(campo + " " + cv.getMessage(), Alerta.TIPO_WARNING));
 			}
+
 			vistaSeleccionada = operacionesVista(request, response, VIEW_FORM);
 		} else {
 			int id = Integer.parseInt(pId);
@@ -232,10 +234,10 @@ public class ProductosController extends HttpServlet {
 			int descuento = Integer.parseInt(pDescuento);
 
 			Producto pojo = null;
-			List<Producto> listado = dao.getAll();
+			List<Producto> listado = daoProducto.getAll();
 			if (id == 0) {
 				pojo = new Producto(nombre, precio, imagen, descripcion, descuento);
-				dao.create(pojo);
+				daoProducto.create(pojo);
 			} else {
 				for (Producto producto : listado) {
 					if (producto.getId() == id) {
@@ -244,7 +246,10 @@ public class ProductosController extends HttpServlet {
 						producto.setDescripcion(descripcion);
 						producto.setDescuento(descuento);
 						producto.setPrecio(precio);
-						dao.update(producto.getId(), producto);
+						producto.setFechaCreacion(producto.getFechaCreacion());
+						producto.setFechaModificacion(producto.getFechaModificacion());
+						producto.setFechaEliminacion(producto.getFechaEliminacion());
+						daoProducto.update(producto.getId(), producto);
 					}
 				}
 			}
@@ -258,19 +263,19 @@ public class ProductosController extends HttpServlet {
 		Producto productoForm = null;
 
 		if (pId != null) {
-			productoForm = dao.getById(Integer.parseInt(pId));
+			productoForm = daoProducto.getById(Integer.parseInt(pId));
 		}
 
 		if (productoForm == null) {
 			productoForm = new Producto();
 		}
-		request.setAttribute("producto", productoForm);
+
 		mensajes.clear();
 		vistaSeleccionada = operacionesVista(request, response, VIEW_FORM);
 	}
 
 	private void listar(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		request.setAttribute("productos", dao.getAll());
+		request.setAttribute("productos", daoProducto.getAll());
 		mensajes.clear();
 		vistaSeleccionada = operacionesVista(request, response, VIEW_TABLA);
 	}

@@ -1,4 +1,4 @@
-package com.ipartek.formacion.supermercado.controller.seguridad;
+package com.ipartek.formacion.supermercado.controller.mipanel;
 
 import java.util.List;
 import java.util.Set;
@@ -13,6 +13,7 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
@@ -25,14 +26,13 @@ import com.ipartek.formacion.supermercado.modelo.dao.ProductoDAO;
 import com.ipartek.formacion.supermercado.modelo.dao.RolDAO;
 import com.ipartek.formacion.supermercado.modelo.dao.UsuarioDAO;
 import com.ipartek.formacion.supermercado.modelo.pojo.Producto;
-import com.ipartek.formacion.supermercado.modelo.pojo.Rol;
 import com.ipartek.formacion.supermercado.modelo.pojo.Usuario;
 import com.mysql.jdbc.exceptions.MySQLIntegrityConstraintViolationException;
 
 /**
  * Servlet implementation class ProductosController
  */
-@WebServlet("/seguridad/usuarios")
+@WebServlet("/mipanel/usuarios")
 public class UsuariosController extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	private final static Logger LOG = Logger.getLogger(UsuariosController.class);
@@ -68,7 +68,6 @@ public class UsuariosController extends HttpServlet {
 	String pFechaCreacion = "";
 	String pFechaModificacion = "";
 	String pFechaEliminacion = "";
-	String pRol = "";
 
 	@Override
 	public void init() throws ServletException {
@@ -110,8 +109,11 @@ public class UsuariosController extends HttpServlet {
 
 		// recoger parametros
 		String pAccion = request.getParameter("accion");
+		HttpSession session = request.getSession();
+		Usuario usuarioSesion = (Usuario)session.getAttribute("usuarioLogeado");
+		int idSesion = usuarioSesion.getId();
 
-		mapper(request, response);
+		doRecogerDatos(request, response);
 
 		try {
 			// TODO log
@@ -137,7 +139,7 @@ public class UsuariosController extends HttpServlet {
 				break;
 			}
 
-			request.setAttribute("productos", dao.getAll());
+			request.setAttribute("productos", dao.getAllByUser(idSesion));
 		} catch (MySQLIntegrityConstraintViolationException e) {
 			mensajes.add(new Alerta("El nombre de ese producto ya existe.", Alerta.TIPO_DANGER));
 		} catch (Exception e) {
@@ -152,6 +154,10 @@ public class UsuariosController extends HttpServlet {
 
 	private String operacionesVista(HttpServletRequest request, HttpServletResponse response, String destino) {
 		String vista = "";
+		HttpSession session = request.getSession();
+		Usuario usuarioSesion = (Usuario)session.getAttribute("usuarioLogeado");
+		int idSesion = usuarioSesion.getId();
+		
 		if (destino.equals(VIEW_FORM)) {
 			int id;
 			Usuario usuarioForm = null;
@@ -177,13 +183,13 @@ public class UsuariosController extends HttpServlet {
 		}
 
 		if (destino.equals(VIEW_TABLA)) {
-			request.setAttribute("usuarios", dao.getAll());
+			request.setAttribute("usuarios", dao.getAllByUser(idSesion));
 			vista = destino;
 		}
 		return vista;
 	}
 
-	private void mapper(HttpServletRequest request, HttpServletResponse response) {
+	private void doRecogerDatos(HttpServletRequest request, HttpServletResponse response) {
 		pId = request.getParameter("id");
 		pNombre = request.getParameter("nombre");
 		pContrasenia = request.getParameter("contrasenia");
@@ -193,7 +199,6 @@ public class UsuariosController extends HttpServlet {
 		pFechaModificacion = request.getParameter("fecha-modificacion");
 		pFechaEliminacion = request.getParameter("fecha-eliminacion");
 		pRol = request.getParameter("rol");
-
 	}
 
 	private void eliminar(HttpServletRequest request, HttpServletResponse response) throws Exception {
@@ -204,33 +209,20 @@ public class UsuariosController extends HttpServlet {
 	}
 
 	private void guardar(HttpServletRequest request, HttpServletResponse response) throws Exception {
-		Timestamp fechaCrea = null;
 		Timestamp fechaMod = null;
 		Timestamp fechaElim = null;
-		Rol rol = null;
-
-		if (pFechaCreacion != null) {
-			fechaCrea = Timestamp.valueOf(pFechaCreacion);
-		}else {
-			fechaCrea = new Timestamp(System.currentTimeMillis());
-		}
-
+		
 		if (pFechaModificacion != null) {
 			fechaMod = Timestamp.valueOf(pFechaModificacion);
 		}
-
+		
 		if (pFechaEliminacion != null) {
 			fechaElim = Timestamp.valueOf(pFechaEliminacion);
 		}
 		
-		if (pRol != null) {
-			rol = daoRol.getById(Integer.parseInt(pRol));
-		}else {
-			rol = new Rol();
-		}
-
-		Usuario pGuardar = new Usuario(Integer.parseInt(pId), pNombre, pContrasenia, pEmail, pImagen, fechaCrea,
-				fechaMod, fechaElim, rol);
+		Usuario pGuardar = new Usuario(Integer.parseInt(pId), pNombre, pContrasenia, pEmail, pImagen,
+				Timestamp.valueOf(pFechaCreacion), fechaMod,
+				fechaElim, rol);
 
 		validator.validate(pGuardar);
 
@@ -258,12 +250,16 @@ public class UsuariosController extends HttpServlet {
 			Timestamp fechaCreacion = Timestamp.valueOf(pFechaCreacion);
 			Timestamp fechaModificacion = Timestamp.valueOf(pFechaModificacion);
 			Timestamp fechaEliminacion = Timestamp.valueOf(pFechaEliminacion);
+			Rol rol = 
+			
+			HttpSession session = request.getSession();
+			Usuario usuarioSesion = (Usuario)session.getAttribute("usuarioLogeado");
+			int idSesion = usuarioSesion.getId();
 
 			Usuario pojo = null;
-			List<Usuario> listado = dao.getAll();
+			List<Usuario> listado = dao.getAllByUser(idSesion);
 			if (id == 0) {
-				pojo = new Usuario(id, nombre, contrasenia, email, imagen, fechaCreacion, fechaModificacion,
-						fechaEliminacion, rol);
+				pojo = new Usuario(id, nombre, contrasenia, email, imagen, fechaCreacion, fechaModificacion, fechaEliminacion, rol);
 				dao.create(pojo);
 			} else {
 				for (Usuario usuario : listado) {
@@ -275,7 +271,6 @@ public class UsuariosController extends HttpServlet {
 						usuario.setFechaCreacion(fechaCreacion);
 						usuario.setFechaModificacion(fechaModificacion);
 						usuario.setFechaEliminacion(fechaEliminacion);
-						usuario.setRol(rol);
 						dao.update(usuario.getId(), usuario);
 					}
 				}
@@ -302,7 +297,11 @@ public class UsuariosController extends HttpServlet {
 	}
 
 	private void listar(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		request.setAttribute("usuarios", dao.getAll());
+		HttpSession session = request.getSession();
+		Usuario usuarioSesion = (Usuario)session.getAttribute("usuarioLogeado");
+		int idSesion = usuarioSesion.getId();
+		
+		request.setAttribute("usuarios", dao.getAllByUser(idSesion));
 		mensajes.clear();
 		vistaSeleccionada = operacionesVista(request, response, VIEW_TABLA);
 	}

@@ -14,6 +14,7 @@ import org.jsoup.safety.Whitelist;
 
 import com.ipartek.formacion.supermercado.modelo.ConnectionManager;
 import com.ipartek.formacion.supermercado.modelo.pojo.Producto;
+import com.ipartek.formacion.supermercado.modelo.pojo.Rol;
 //import com.ipartek.formacion.supermercado.modelo.pojo.Rol;
 import com.ipartek.formacion.supermercado.modelo.pojo.Usuario;
 
@@ -23,11 +24,20 @@ public class UsuarioDAO implements IUsuarioDAO {
 	
 	private static UsuarioDAO INSTANCE = null;
 
-	private static final String SQL_GET_ALL = "SELECT id, nombre, contrasenia, email, imagen, fecha_creacion, fecha_eliminacion FROM usuario WHERE fecha_eliminacion IS NULL ORDER BY id DESC LIMIT 500;";
-	private static final String SQL_GET_BY_ID = "SELECT id, nombre, contrasenia, email, imagen, fecha_creacion, fecha_eliminacion FROM usuario WHERE id = ?;";
+	private static final String SQL_GET_ALL = " SELECT u.id as 'id_usuario', u.nombre as 'nombre_usuario', u.contrasenia, u.email, u.imagen, u.fecha_creacion, u.fecha_eliminacion, u.id_rol, r.id AS 'id_rol', r.nombre  AS 'nombre_rol'" + 
+												" FROM usuario AS u, rol AS r" + 
+												" WHERE u.id_rol = r.id AND u.fecha_eliminacion IS NULL;";
+	private static final String SQL_GET_ALL_BY_USER = " SELECT u.id as 'id_usuario', u.nombre as 'nombre_usuario', u.contrasenia, u.email, u.imagen, u.fecha_creacion, u.fecha_eliminacion, u.id_rol, r.id AS 'id_rol', r.nombre  AS 'nombre_rol'" + 
+													" FROM usuario AS u, rol AS r" + 
+													" WHERE u.id_rol = r.id AND u.fecha_eliminacion IS NULL AND u.id = ?;";
+	private static final String SQL_GET_BY_ID = " SELECT u.id as 'id_usuario', u.nombre as 'nombre_usuario', u.contrasenia, u.email, u.imagen, u.fecha_creacion, u.fecha_eliminacion, u.id_rol, r.id AS 'id_rol', r.nombre  AS 'nombre_rol'" + 
+													" FROM usuario AS u, rol AS r" + 
+													" WHERE u.id_rol = r.id AND u.id = ? AND u.fecha_eliminacion IS NULL;";
 	private static final String SQL_GET_ALL_BY_NOMBRE = "SELECT id, nombre, contrasenia, email, imagen, fecha_creacion, fecha_eliminacion FROM usuario WHERE nombre LIKE ? ORDER BY nombre ASC LIMIT 500;";
-	private static final String SQL_EXISTE = " SELECT id, nombre, contrasenia, email, imagen, fecha_creacion, fecha_eliminacion FROM usuario as u WHERE nombre = ? AND contrasenia = ? AND fecha_eliminacion IS NULL;";
-	private static final String SQL_INSERT = "INSERT INTO usuario (nombre, contrasenia, email, imagen, fecha_creacion) VALUES ( ? , ?, ?, ?, CURRENT_TIMESTAMP());";
+	private static final String SQL_EXISTE = " SELECT u.id as 'id_usuario', u.nombre as 'nombre_usuario', u.contrasenia, u.email, u.imagen, u.fecha_creacion, u.fecha_eliminacion, u.id_rol, r.id AS 'id_rol', r.nombre  AS 'nombre_rol'" + 
+												" FROM usuario AS u, rol AS r" + 
+												" WHERE u.id_rol = r.id AND u.nombre = ? AND u.contrasenia = ? AND u.fecha_eliminacion IS NULL;";
+	private static final String SQL_INSERT = "INSERT INTO usuario (nombre, contrasenia, email, imagen, fecha_creacion,id_rol) VALUES ( ? , ?, ?, ?, CURRENT_TIMESTAMP(),?);";
 	private static final String SQL_UPDATE = "UPDATE usuario SET nombre= ?, contrasenia= ?, imagen=?, email=? WHERE id = ?;";
 	private static final String SQL_DELETE = "DELETE FROM usuario WHERE id = ?;";
 	private static final String SQL_DELETE_LOGICO = "UPDATE usuario SET fecha_eliminacion = CURRENT_TIMESTAMP() WHERE id = ?;";
@@ -49,18 +59,14 @@ public class UsuarioDAO implements IUsuarioDAO {
 	private Usuario mapper(ResultSet rs) throws SQLException {
 
 		Usuario resultado = new Usuario();
-		resultado.setId(rs.getInt("id"));
-		resultado.setNombre(rs.getString("nombre"));
+		resultado.setId(rs.getInt("id_usuario"));
+		resultado.setNombre(rs.getString("nombre_usuario"));
 		resultado.setContrasenia(rs.getString("contrasenia"));
 		resultado.setEmail(rs.getString("email"));
 		resultado.setImagen(rs.getString("imagen"));
 		resultado.setFechaCreacion(rs.getTimestamp("fecha_creacion"));
 		resultado.setFechaEliminacion(rs.getTimestamp("fecha_eliminacion"));
-
-		/*
-		 * Rol rol = new Rol(); rol.setId( rs.getInt("id_rol")); rol.setNombre(
-		 * rs.getString("nombre_rol")); u.setRol(rol);
-		 */
+		resultado.setRol(new Rol(rs.getInt("id_rol"),rs.getString("nombre_rol")));
 
 		return resultado;
 	}
@@ -98,6 +104,29 @@ public class UsuarioDAO implements IUsuarioDAO {
 		}
 
 		return usuario;
+	}
+	
+	public ArrayList<Usuario> getAllByUser(int id) {
+
+		ArrayList<Usuario> lista = new ArrayList<Usuario>();
+
+		try (Connection con = ConnectionManager.getConnection();
+				PreparedStatement pst = con.prepareStatement(SQL_GET_ALL_BY_USER)){
+			
+				pst.setInt(1, id);
+				
+				ResultSet rs = pst.executeQuery();
+
+			while (rs.next()) {
+				lista.add(mapper(rs));
+
+			}
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+
+		return lista;
 	}
 	
 	public ArrayList<Usuario> getAll() {
@@ -237,6 +266,7 @@ public class UsuarioDAO implements IUsuarioDAO {
 			pst.setString(2, pojo.getContrasenia());
 			pst.setString(3, pojo.getEmail());
 			pst.setString(4, pojo.getImagen());
+			pst.setInt(5, pojo.getRol().getId());
 
 			int affectedRows = pst.executeUpdate();
 			if (affectedRows == 1) {

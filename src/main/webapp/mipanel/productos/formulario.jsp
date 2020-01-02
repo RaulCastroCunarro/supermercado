@@ -39,7 +39,7 @@
 							name="descripcion" placeholder="Descripción"
 							value="${producto.descripcion}" required="required"
 							class="form-control mb-2 p-2" />
-						<label>Usuario</label>
+						<input type="hidden" name="usuarioId" value="${producto.usuario.nombre}" />
 						<select name="usuarioId" class="custom-select">
 							<c:forEach items="${usuarios}" var="u">
 								<option value="${u.id}" ${(u.id eq producto.usuario.id)?"selected":""}>${u.nombre}</option>

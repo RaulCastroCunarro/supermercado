@@ -35,6 +35,9 @@ public class Usuario {
 	private Timestamp fechaModificacion;
 
 	private Timestamp fechaEliminacion;
+	
+	@NotNull
+	private Rol rol;
 
 	public Usuario() {
 		super();
@@ -46,10 +49,11 @@ public class Usuario {
 		fechaCreacion = null;
 		fechaModificacion = null;
 		fechaEliminacion = null;
+		this.rol = new Rol();
 	}
 
 	public Usuario(int id, String nombre, String password, String email, String imagen, Timestamp fechaCreacion,
-			Timestamp fechaModificacion, Timestamp fechaEliminacion) {
+			Timestamp fechaModificacion, Timestamp fechaEliminacion, Rol rol) {
 		super();
 		this.id = id;
 		this.nombre = nombre;
@@ -59,6 +63,7 @@ public class Usuario {
 		this.fechaCreacion = fechaCreacion;
 		this.fechaModificacion = fechaModificacion;
 		this.fechaEliminacion = fechaEliminacion;
+		this.rol = rol;
 	}
 
 	public int getId() {
@@ -125,11 +130,19 @@ public class Usuario {
 		this.fechaEliminacion = fechaEliminacion;
 	}
 
+	public Rol getRol() {
+		return rol;
+	}
+
+	public void setRol(Rol rol) {
+		this.rol = rol;
+	}
+
 	@Override
 	public String toString() {
 		return "Usuario [id=" + id + ", nombre=" + nombre + ", contrasenia=" + contrasenia + ", email=" + email
 				+ ", imagen=" + imagen + ", fechaCreacion=" + fechaCreacion + ", fechaModificacion=" + fechaModificacion
-				+ ", fechaEliminacion=" + fechaEliminacion + "]";
+				+ ", fechaEliminacion=" + fechaEliminacion + ", rol=" + rol.toString() + "]";
 	}
 
 }

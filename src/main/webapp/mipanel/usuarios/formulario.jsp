@@ -33,16 +33,10 @@
 							value="${usuario.imagen}" required="required"
 							pattern="http(|s):.*\.(jpg|png|jpeg|gif)"
 							onblur="cargarImagen()" class="form-control mb-2 p-2" />
-						<select name="rol" class="form-control mb-2 p-2 custom-select">
-							<option value="1"}>Usuario</option>
-							<option value="2"}>Administrador</option>
-						</select>
-						<c:if test="${usuario.fechaCreacion!=null}">
-							<label for="imagen">Fecha de Creación</label>
-							<input type="text" name="fecha-creacion" placeholder="Fecha de creación del usuario"
-								value="${usuario.fechaCreacion}" required="required"
-								readonly  class="form-control mb-2 p-2" />
-						</c:if>
+						<label for="imagen">Fecha de Creación</label>
+						<input type="text" name="fecha-creacion" placeholder="Fecha de creación del usuario"
+							value="${usuario.fechaCreacion}" required="required"
+							readonly  class="form-control mb-2 p-2" />
 						<c:if test="${usuario.fechaModificacion!=null}">
 							<label for="imagen">Fecha de Modificación</label>
 							<input type="text" name="fecha-modificacion" placeholder="Fecha de última modificación del usuario"

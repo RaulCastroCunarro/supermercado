@@ -43,10 +43,8 @@ public class Producto {
 	@NotNull
 	private Timestamp fechaCreacion;
 	
-	@NotNull
 	private Timestamp fechaModificacion;
 	
-	@NotNull
 	private Timestamp fechaEliminacion;
 	
 	@NotNull

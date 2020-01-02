@@ -21,47 +21,68 @@ public class ProductoDAO implements IDAO<Producto> {
 
 	private static ProductoDAO INSTANCE;
 
-	private static final String SQL_GET_ALL = "SELECT" + 
-			"		p.id AS 'id_producto'," + 
-			"		p.nombre AS 'nombre_producto'," + 
-			"		p.imagen AS 'imagen_producto'," + 
-			"		p.precio," + 
-			"		p.descripcion," + 
-			"		p.descuento," + 
-			"		p.fecha_creacion AS 'fecha_creacion_producto'," + 
-			"		p.fecha_modificacion AS 'fecha_modificacion_producto'," + 
-			"		p.fecha_eliminacion AS 'fecha_eliminacion_producto'," + 
+	private static final String SQL_GET_ALL = "SELECT " + 
+			"		p.id AS 'id_producto', " + 
+			"		p.nombre AS 'nombre_producto', " + 
+			"		p.imagen AS 'imagen_producto', " + 
+			"		p.precio, " + 
+			"		p.descripcion, " + 
+			"		p.descuento, " + 
+			"		p.fecha_creacion AS 'fecha_creacion_producto', " + 
+			"		p.fecha_modificacion AS 'fecha_modificacion_producto', " + 
+			"		p.fecha_eliminacion AS 'fecha_eliminacion_producto', " + 
+			"		u.id AS 'id_usuario', " + 
+			"		u.nombre 'nombre_usuario', " + 
+			"		u.contrasenia, " + 
+			"		u.email AS 'email', " + 
+			"		u.imagen AS 'imagen_usuario', " + 
+			"		u.fecha_creacion AS 'fecha_creacion_usuario', " + 
+			"		u.fecha_modificacion AS 'fecha_modificacion_usuario', " + 
+			"		u.fecha_eliminacion AS 'fecha_eliminacion_usuario' " + 
+			"FROM producto p INNER JOIN usuario u " + 
+			"WHERE p.fecha_eliminacion IS NULL AND p.id_usuario = u.id " + 
+			" ORDER BY p.id DESC LIMIT 500;";
+	private static final String SQL_GET_ALL_BY_USER = "SELECT " + 
+			"		p.id AS 'id_producto', " + 
+			"		p.nombre AS 'nombre_producto', " + 
+			"		p.imagen AS 'imagen_producto', " + 
+			"		p.precio, " + 
+			"		p.descripcion, " + 
+			"		p.descuento, " + 
+			"		p.fecha_creacion AS 'fecha_creacion_producto', " + 
+			"		p.fecha_modificacion AS 'fecha_modificacion_producto', " + 
+			"		p.fecha_eliminacion AS 'fecha_eliminacion_producto', " + 
+			"		u.id AS 'id_usuario', " + 
+			"		u.nombre 'nombre_usuario', " + 
+			"		u.contrasenia, " + 
+			"		u.email AS 'email', " + 
+			"		u.imagen AS 'imagen_usuario', " + 
+			"		u.fecha_creacion AS 'fecha_creacion_usuario', " + 
+			"		u.fecha_modificacion AS 'fecha_modificacion_usuario', " + 
+			"		u.fecha_eliminacion AS 'fecha_eliminacion_usuario' " + 
+			"FROM producto p INNER JOIN usuario u " + 
+			"WHERE p.fecha_eliminacion IS NULL AND p.id_usuario = u.id AND p.id_usuario = ?" + 
+			" ORDER BY p.id DESC LIMIT 500;";
+	private static final String SQL_GET_BY_ID = "SELECT " + 
+			"		p.id AS 'id_producto', " + 
+			"		p.nombre AS 'nombre_producto', " + 
+			"		p.imagen AS 'imagen_producto', " + 
+			"		p.precio, " + 
+			"		p.descripcion, " + 
+			"		p.descuento, " + 
+			"		p.fecha_creacion AS 'fecha_creacion_producto', " + 
+			"		p.fecha_modificacion AS 'fecha_modificacion_producto', " + 
+			"		p.fecha_eliminacion AS 'fecha_eliminacion_producto', " + 
 			"		u.id AS 'id_usuario'," + 
-			"		u.nombre," + 
-			"		u.contrasenia," + 
-			"		u.email AS 'email'," + 
-			"		u.imagen AS 'imagen_usuario'," + 
+			"		u.nombre AS 'nombre_usuario', " + 
+			"		u.contrasenia, " + 
+			"		u.email, " + 
+			"		u.imagen AS 'imagen_usuario', " + 
 			"		u.fecha_creacion AS 'fecha_creacion_usuario'," + 
-			"		u.fecha_modificacion AS 'fecha_modificacion_usuario'," + 
-			"		u.fecha_eliminacion AS 'fecha_eliminacion_usuario'" + 
-			"FROM producto p INNER JOIN usuario u" + 
-			"WHERE p.fecha_eliminacion IS NULL AND p.id_usuario = u.id" + 
-			"ORDER BY p.id DESC LIMIT 500;";
-	private static final String SQL_GET_BY_ID = "SELECT" + 
-			"		p.id AS 'id_producto'," + 
-			"		p.nombre AS 'nombre_producto'," + 
-			"		p.imagen AS 'imagen_producto'," + 
-			"		p.precio," + 
-			"		p.descripcion,n" + 
-			"		p.descuento," + 
-			"		p.fecha_creacion AS 'fecha_creacion_producto'," + 
-			"		p.fecha_modificacion AS 'fecha_modificacion_producto'," + 
-			"		p.fecha_eliminacion AS 'fecha_eliminacion_producto'," + 
-			"		u.id AS 'id_usuario'," + 
-			"		u.nombre AS 'nombre_usuario'," + 
-			"		u.contrasenia," + 
-			"		u.email," + 
-			"		u.imagen AS 'imagen_usuario'," + 
-			"		u.fecha_creacion AS 'fecha_creacion_usuario'," + 
-			"		u.fecha_modificacion AS 'fecha_modificacion_usuario'," + 
-			"		u.fecha_eliminacion AS 'fecha_eliminacion_usuario'" + 
-			"FROM producto p INNER JOIN usuario u" + 
-			"WHERE p.fecha_eliminacion IS NULL AND p.id_usuario = u.id AND p.id = ?" + 
+			"		u.fecha_modificacion AS 'fecha_modificacion_usuario', " + 
+			"		u.fecha_eliminacion AS 'fecha_eliminacion_usuario' " + 
+			"FROM producto p INNER JOIN usuario u " + 
+			"WHERE p.fecha_eliminacion IS NULL AND p.id_usuario = u.id AND p.id = ? " + 
 			"ORDER BY p.id DESC LIMIT 500;";
 	private static final String SQL_INSERT = "INSERT INTO producto (id, nombre, imagen, precio, descuento, descripcion, fecha_creacion, id_usuario) VALUES ( ? , ?, ?, ?, ?, ?, CURRENT_TIMESTAMP());";
 	private static final String SQL_UPDATE = "UPDATE producto SET nombre= ?, imagen=?, precio=?, descuento=?, descripcion=?, id_usuario=? WHERE id = ?;";
@@ -111,17 +132,44 @@ public class ProductoDAO implements IDAO<Producto> {
 
 	private Producto sanitizar(Producto pojo) {
 		Producto resultado = pojo;
+		Usuario usuario = pojo.getUsuario();
 
 		resultado.setNombre(Jsoup.clean(pojo.getNombre(), Whitelist.none()));
 		resultado.setImagen(Jsoup.clean(pojo.getImagen(), Whitelist.none()));
 		resultado.setDescripcion(Jsoup.clean(pojo.getDescripcion(), Whitelist.none()));
-		resultado.setDescripcion(Jsoup.clean(pojo.getUsuario().getNombre(), Whitelist.none()));
-		resultado.setDescripcion(Jsoup.clean(pojo.getUsuario().getImagen(), Whitelist.none()));
-		resultado.setDescripcion(Jsoup.clean(pojo.getUsuario().getEmail(), Whitelist.none()));
+		usuario.setNombre(Jsoup.clean(pojo.getUsuario().getNombre(), Whitelist.none()));
+		usuario.setImagen(Jsoup.clean(pojo.getUsuario().getImagen(), Whitelist.none()));
+		usuario.setEmail(Jsoup.clean(pojo.getUsuario().getEmail(), Whitelist.none()));
+		resultado.setUsuario(usuario);
 
 		return resultado;
 	}
 
+	public List<Producto> getAllByUser(int id) {
+
+		ArrayList<Producto> lista = new ArrayList<Producto>();
+
+		try (Connection con = ConnectionManager.getConnection();
+				PreparedStatement pst = con.prepareStatement(SQL_GET_ALL_BY_USER)){
+				
+				pst.setInt(1, id);
+				
+				ResultSet rs = pst.executeQuery();
+
+			while (rs.next()) {
+
+				Producto p = mapper(rs);
+				lista.add(p);
+
+			}
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+
+		return lista;
+	}
+	
 	@Override
 	public List<Producto> getAll() {
 

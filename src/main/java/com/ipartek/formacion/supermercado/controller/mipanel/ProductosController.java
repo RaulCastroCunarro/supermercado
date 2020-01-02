@@ -1,10 +1,9 @@
-package com.ipartek.formacion.supermercado.controller.seguridad;
+package com.ipartek.formacion.supermercado.controller.mipanel;
 
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
 import java.io.IOException;
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Iterator;
 
@@ -13,6 +12,7 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
@@ -22,29 +22,27 @@ import org.apache.log4j.Logger;
 
 import com.ipartek.formacion.supermercado.controller.Alerta;
 import com.ipartek.formacion.supermercado.modelo.dao.ProductoDAO;
-import com.ipartek.formacion.supermercado.modelo.dao.RolDAO;
 import com.ipartek.formacion.supermercado.modelo.dao.UsuarioDAO;
 import com.ipartek.formacion.supermercado.modelo.pojo.Producto;
-import com.ipartek.formacion.supermercado.modelo.pojo.Rol;
 import com.ipartek.formacion.supermercado.modelo.pojo.Usuario;
 import com.mysql.jdbc.exceptions.MySQLIntegrityConstraintViolationException;
 
 /**
  * Servlet implementation class ProductosController
  */
-@WebServlet("/seguridad/usuarios")
-public class UsuariosController extends HttpServlet {
+@WebServlet("/mipanel/productos")
+public class ProductosController extends HttpServlet {
 	private static final long serialVersionUID = 1L;
-	private final static Logger LOG = Logger.getLogger(UsuariosController.class);
+	private final static Logger LOG = Logger.getLogger(ProductosController.class);
 
-	private static final String VIEW_TABLA = "usuarios/index.jsp";
-	private static final String VIEW_FORM = "usuarios/formulario.jsp";
+	private static final String VIEW_TABLA = "productos/index.jsp";
+	private static final String VIEW_FORM = "productos/formulario.jsp";
 	private static final int MIN_CAR = 2;
 	private static final int MAX_CAR = 150;
 	private static String FORWARD = VIEW_TABLA;
 
-	private static UsuarioDAO dao;
-	private static RolDAO daoRol;
+	private static ProductoDAO daoProducto;
+	private static UsuarioDAO daoUsuario;
 
 	public static final String ACCION_LISTAR = "listar";
 	public static final String ACCION_FORM = "formulario";
@@ -62,18 +60,17 @@ public class UsuariosController extends HttpServlet {
 
 	String pId = "";
 	String pNombre = "";
-	String pContrasenia = "";
-	String pEmail = "";
+	String pPrecio = "";
 	String pImagen = "";
-	String pFechaCreacion = "";
-	String pFechaModificacion = "";
-	String pFechaEliminacion = "";
-	String pRol = "";
+	String pDescripcion = "";
+	String pDescuento = "";
+	Usuario pUsuario = null;
 
 	@Override
 	public void init() throws ServletException {
 		super.init();
-		dao = UsuarioDAO.getInstance();
+		daoProducto = ProductoDAO.getInstance();
+		daoUsuario = UsuarioDAO.getInstance();
 		// Crear Factoria y Validador
 		factory = Validation.buildDefaultValidatorFactory();
 		validator = factory.getValidator();
@@ -82,7 +79,8 @@ public class UsuariosController extends HttpServlet {
 	@Override
 	public void destroy() {
 		super.destroy();
-		dao = null;
+		daoProducto = null;
+		daoUsuario = null;
 		factory = null;
 		validator = null;
 	}
@@ -110,6 +108,10 @@ public class UsuariosController extends HttpServlet {
 
 		// recoger parametros
 		String pAccion = request.getParameter("accion");
+		
+		HttpSession session = request.getSession();
+		Usuario usuarioSesion = (Usuario)session.getAttribute("usuarioLogeado");
+		int idSesion = usuarioSesion.getId();
 
 		mapper(request, response);
 
@@ -137,7 +139,7 @@ public class UsuariosController extends HttpServlet {
 				break;
 			}
 
-			request.setAttribute("productos", dao.getAll());
+			request.setAttribute("productos", daoProducto.getAllByUser(idSesion));
 		} catch (MySQLIntegrityConstraintViolationException e) {
 			mensajes.add(new Alerta("El nombre de ese producto ya existe.", Alerta.TIPO_DANGER));
 		} catch (Exception e) {
@@ -151,33 +153,39 @@ public class UsuariosController extends HttpServlet {
 	}
 
 	private String operacionesVista(HttpServletRequest request, HttpServletResponse response, String destino) {
+		
+		HttpSession session = request.getSession();
+		Usuario usuarioSesion = (Usuario)session.getAttribute("usuarioLogeado");
+		int idSesion = usuarioSesion.getId();
+		
 		String vista = "";
 		if (destino.equals(VIEW_FORM)) {
 			int id;
-			Usuario usuarioForm = null;
+			Producto productoForm = null;
 			try {
 				id = Integer.parseInt(request.getParameter("id"));
 
 				if (pId != null) {
-					usuarioForm = dao.getById(id);
+					productoForm = daoProducto.getById(id);
 				}
 
-				if (usuarioForm == null) {
-					usuarioForm = new Usuario();
+				if (productoForm == null) {
+					productoForm = new Producto();
 				}
 			} catch (NumberFormatException e) {
-				if (usuarioForm == null) {
-					usuarioForm = new Usuario();
+				if (productoForm == null) {
+					productoForm = new Producto();
 				}
 			}
 
-			request.setAttribute("usuario", usuarioForm);
+			request.setAttribute("usuarios", daoUsuario.getAllByUser(idSesion));
+			request.setAttribute("producto", productoForm);
 
 			vista = destino;
 		}
 
 		if (destino.equals(VIEW_TABLA)) {
-			request.setAttribute("usuarios", dao.getAll());
+			request.setAttribute("productos", daoProducto.getAllByUser(idSesion));
 			vista = destino;
 		}
 		return vista;
@@ -186,59 +194,36 @@ public class UsuariosController extends HttpServlet {
 	private void mapper(HttpServletRequest request, HttpServletResponse response) {
 		pId = request.getParameter("id");
 		pNombre = request.getParameter("nombre");
-		pContrasenia = request.getParameter("contrasenia");
-		pEmail = request.getParameter("email");
+		pPrecio = request.getParameter("precio");
 		pImagen = request.getParameter("imagen");
-		pFechaCreacion = request.getParameter("fecha-creacion");
-		pFechaModificacion = request.getParameter("fecha-modificacion");
-		pFechaEliminacion = request.getParameter("fecha-eliminacion");
-		pRol = request.getParameter("rol");
-
+		pDescripcion = request.getParameter("descripcion");
+		pDescuento = request.getParameter("descuento");
+		if (request.getParameter("usuario") == null) {
+			if (request.getParameter("idUsuario") != null) {
+				pUsuario = daoUsuario.getById(Integer.parseInt(request.getParameter("idUsuario")));
+			}
+		}
 	}
 
 	private void eliminar(HttpServletRequest request, HttpServletResponse response) throws Exception {
 		int id = Integer.parseInt(request.getParameter("id"));
-		dao.delete(id);
+		daoProducto.delete(id);
 		mensajes.clear();
 		vistaSeleccionada = operacionesVista(request, response, VIEW_TABLA);
 	}
 
 	private void guardar(HttpServletRequest request, HttpServletResponse response) throws Exception {
-		Timestamp fechaCrea = null;
-		Timestamp fechaMod = null;
-		Timestamp fechaElim = null;
-		Rol rol = null;
 
-		if (pFechaCreacion != null) {
-			fechaCrea = Timestamp.valueOf(pFechaCreacion);
-		}else {
-			fechaCrea = new Timestamp(System.currentTimeMillis());
-		}
-
-		if (pFechaModificacion != null) {
-			fechaMod = Timestamp.valueOf(pFechaModificacion);
-		}
-
-		if (pFechaEliminacion != null) {
-			fechaElim = Timestamp.valueOf(pFechaEliminacion);
-		}
-		
-		if (pRol != null) {
-			rol = daoRol.getById(Integer.parseInt(pRol));
-		}else {
-			rol = new Rol();
-		}
-
-		Usuario pGuardar = new Usuario(Integer.parseInt(pId), pNombre, pContrasenia, pEmail, pImagen, fechaCrea,
-				fechaMod, fechaElim, rol);
+		Producto pGuardar = new Producto(Integer.parseInt(pId), pNombre, Float.parseFloat(pPrecio), pImagen,
+				pDescripcion, Integer.parseInt(pDescuento), pUsuario);
 
 		validator.validate(pGuardar);
 
 		// Obtener las ConstrainViolation
-		Set<ConstraintViolation<Usuario>> violations = validator.validate(pGuardar);
+		Set<ConstraintViolation<Producto>> violations = validator.validate(pGuardar);
 		if (violations.size() > 0) {
 			/* No ha pasado la valiadacion, iterar sobre los mensajes de validacion */
-			for (ConstraintViolation<Usuario> cv : violations) {
+			for (ConstraintViolation<Producto> cv : violations) {
 				char[] caracteres = cv.getPropertyPath().toString().toCharArray();
 				caracteres[0] = Character.toUpperCase(caracteres[0]);
 				String campo = "";
@@ -248,35 +233,37 @@ public class UsuariosController extends HttpServlet {
 
 				mensajes.add(new Alerta(campo + " " + cv.getMessage(), Alerta.TIPO_WARNING));
 			}
+
 			vistaSeleccionada = operacionesVista(request, response, VIEW_FORM);
 		} else {
 			int id = Integer.parseInt(pId);
 			String nombre = pNombre;
-			String contrasenia = pContrasenia;
-			String email = pEmail;
+			float precio = Float.parseFloat(pPrecio);
 			String imagen = pImagen;
-			Timestamp fechaCreacion = Timestamp.valueOf(pFechaCreacion);
-			Timestamp fechaModificacion = Timestamp.valueOf(pFechaModificacion);
-			Timestamp fechaEliminacion = Timestamp.valueOf(pFechaEliminacion);
+			String descripcion = pDescripcion;
+			int descuento = Integer.parseInt(pDescuento);
+			
+			HttpSession session = request.getSession();
+			Usuario usuarioSesion = (Usuario)session.getAttribute("usuarioLogeado");
+			int idSesion = usuarioSesion.getId();
 
-			Usuario pojo = null;
-			List<Usuario> listado = dao.getAll();
+			Producto pojo = null;
+			List<Producto> listado = daoProducto.getAllByUser(idSesion);
 			if (id == 0) {
-				pojo = new Usuario(id, nombre, contrasenia, email, imagen, fechaCreacion, fechaModificacion,
-						fechaEliminacion, rol);
-				dao.create(pojo);
+				pojo = new Producto(nombre, precio, imagen, descripcion, descuento);
+				daoProducto.create(pojo);
 			} else {
-				for (Usuario usuario : listado) {
-					if (usuario.getId() == id) {
-						usuario.setNombre(nombre);
-						usuario.setContrasenia(contrasenia);
-						usuario.setEmail(email);
-						usuario.setImagen(imagen);
-						usuario.setFechaCreacion(fechaCreacion);
-						usuario.setFechaModificacion(fechaModificacion);
-						usuario.setFechaEliminacion(fechaEliminacion);
-						usuario.setRol(rol);
-						dao.update(usuario.getId(), usuario);
+				for (Producto producto : listado) {
+					if (producto.getId() == id) {
+						producto.setNombre(nombre);
+						producto.setImagen(imagen);
+						producto.setDescripcion(descripcion);
+						producto.setDescuento(descuento);
+						producto.setPrecio(precio);
+						producto.setFechaCreacion(producto.getFechaCreacion());
+						producto.setFechaModificacion(producto.getFechaModificacion());
+						producto.setFechaEliminacion(producto.getFechaEliminacion());
+						daoProducto.update(producto.getId(), producto);
 					}
 				}
 			}
@@ -287,22 +274,26 @@ public class UsuariosController extends HttpServlet {
 	}
 
 	private void irFormulario(HttpServletRequest request, HttpServletResponse response) {
-		Usuario usuarioForm = null;
+		Producto productoForm = null;
 
 		if (pId != null) {
-			usuarioForm = dao.getById(Integer.parseInt(pId));
+			productoForm = daoProducto.getById(Integer.parseInt(pId));
 		}
 
-		if (usuarioForm == null) {
-			usuarioForm = new Usuario();
+		if (productoForm == null) {
+			productoForm = new Producto();
 		}
-		request.setAttribute("usuario", usuarioForm);
+
 		mensajes.clear();
 		vistaSeleccionada = operacionesVista(request, response, VIEW_FORM);
 	}
 
 	private void listar(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		request.setAttribute("usuarios", dao.getAll());
+		HttpSession session = request.getSession();
+		Usuario usuarioSesion = (Usuario)session.getAttribute("usuarioLogeado");
+		int idSesion = usuarioSesion.getId();
+		
+		request.setAttribute("productos", daoProducto.getAllByUser(idSesion));
 		mensajes.clear();
 		vistaSeleccionada = operacionesVista(request, response, VIEW_TABLA);
 	}

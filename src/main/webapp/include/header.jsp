@@ -55,7 +55,7 @@
 					<li class="nav-item"><a class="py-2 d-none d-md-inline-block"
 						href="login.jsp">Login</a></li>
 				</c:if>
-				<c:if test="${not empty usuarioLogeado}">
+				<c:if test="${usuarioLogeado.rol.id eq 2}">
 					<li class="nav-item dropdown"><a
 						class="nav-link dropdown-toggle text-primary" href="#"
 						id="navbarDropdown" role="button" data-toggle="dropdown"
@@ -72,6 +72,27 @@
 						<div class="dropdown-menu" aria-labelledby="navbarDropdown">
 							<a class="dropdown-item" href="seguridad/usuarios?accion=listar">Todos</a> <a
 								class="dropdown-item" href="seguridad/usuarios?accion=formulario">Nuevo</a>
+						</div></li>
+					<li class="nav-item dropdown"><a
+						class="nav-link dropdown-toggle text-primary" href="#"
+						id="navbarDropdown" role="button" data-toggle="dropdown"
+						aria-haspopup="true" aria-expanded="false"><!-- <img class="" src="${usuarioLogeado.getImagen()}" alt="Imagen de Perfil de ${usuarioLogeado.getNombre()}"></img> --></a>
+						<div class="dropdown-menu" aria-labelledby="navbarDropdown">
+							<a class="dropdown-item" href="">${usuarioLogeado.getNombre()}</a> <a
+								class="dropdown-item" href="" data-toggle="modal"
+								data-target="#cerrarSesionModal">Logout <i
+								class="fas fa-sign-out-alt"></i></a>
+						</div></li>
+				</c:if>
+				<c:if test="${usuarioLogeado.rol.id eq 1}">
+					<li class="nav-item dropdown"><a
+						class="nav-link dropdown-toggle text-primary" href="#"
+						id="navbarDropdown" role="button" data-toggle="dropdown"
+						aria-haspopup="true" aria-expanded="false"> Productos </a>
+						<div class="dropdown-menu" aria-labelledby="navbarDropdown">
+							<a class="dropdown-item" href="mipanel/productos?accion=listar">Todos</a>
+							<a class="dropdown-item"
+								href="mipanel/productos?accion=formulario">Nuevo</a>
 						</div></li>
 					<li class="nav-item dropdown"><a
 						class="nav-link dropdown-toggle text-primary" href="#"

@@ -7,7 +7,7 @@
 <div class="card shadow mb-4">
 	<div class="card-header py-3">
 		<h6 class="m-0 font-weight-bold text-center">
-			<a href="seguridad/productos?accion=formulario&id=0"
+			<a href="seguridad/usuarios?accion=formulario&id=0"
 				class="btn btn-primary">Nuevo Usuario</a>
 		</h6>
 	</div>
@@ -22,9 +22,7 @@
 						<th>Nombre</th>
 						<th>Contraseña</th>
 						<th>Email</th>
-						<th>Fecha Creacion</th>
-						<th>Fecha Modificacion</th>
-						<th>Fecha Baja</th>
+						<th>Fecha Última Modificación</th>
 					</tr>
 				</thead>
 				<tfoot>
@@ -34,9 +32,7 @@
 						<th>Nombre</th>
 						<th>Contraseña</th>
 						<th>Email</th>
-						<th>Fecha Creacion</th>
-						<th>Fecha Modificacion</th>
-						<th>Fecha Baja</th>
+						<th>Fecha Última Modificación</th>
 					</tr>
 				</tfoot>
 				<tbody>
@@ -48,9 +44,12 @@
 							<td>${u.nombre}</td>
 							<td>${u.contrasenia}</td>
 							<td>${u.email}</td>
-							<td>${u.fechaCreacion}</td>
-							<td>${u.fechaModificacion}</td>
-							<td>${u.fechaEliminacion}</td>
+							<c:if test="${u.fechaModificacion == null}">
+								<td>${u.fechaCreacion}</td>
+							</c:if>
+							<c:if test="${u.fechaModificacion != null}">
+								<td>${u.fechaModificacion}</td>
+							</c:if>
 							<td><a
 								href="seguridad/usuarios?accion=formulario&id=${u.id}">Editar</a>
 						</tr>

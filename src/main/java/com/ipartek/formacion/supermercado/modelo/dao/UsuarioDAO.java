@@ -5,7 +5,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.sql.Timestamp;
 import java.util.ArrayList;
 
 import org.apache.log4j.Logger;
@@ -13,7 +12,6 @@ import org.jsoup.Jsoup;
 import org.jsoup.safety.Whitelist;
 
 import com.ipartek.formacion.supermercado.modelo.ConnectionManager;
-import com.ipartek.formacion.supermercado.modelo.pojo.Producto;
 import com.ipartek.formacion.supermercado.modelo.pojo.Rol;
 //import com.ipartek.formacion.supermercado.modelo.pojo.Rol;
 import com.ipartek.formacion.supermercado.modelo.pojo.Usuario;
@@ -38,7 +36,7 @@ public class UsuarioDAO implements IUsuarioDAO {
 												" FROM usuario AS u, rol AS r" + 
 												" WHERE u.id_rol = r.id AND u.nombre = ? AND u.contrasenia = ? AND u.fecha_eliminacion IS NULL;";
 	private static final String SQL_INSERT = "INSERT INTO usuario (nombre, contrasenia, email, imagen, fecha_creacion,id_rol) VALUES ( ? , ?, ?, ?, CURRENT_TIMESTAMP(),?);";
-	private static final String SQL_UPDATE = "UPDATE usuario SET nombre= ?, contrasenia= ?, imagen=?, email=? WHERE id = ?;";
+	private static final String SQL_UPDATE = "UPDATE usuario SET nombre= ?, contrasenia= ?, imagen=?, email=?, fecha_modificacion = CURRENT_TIMESTAMP() WHERE id = ?;";
 	private static final String SQL_DELETE = "DELETE FROM usuario WHERE id = ?;";
 	private static final String SQL_DELETE_LOGICO = "UPDATE usuario SET fecha_eliminacion = CURRENT_TIMESTAMP() WHERE id = ?;";
 
@@ -243,8 +241,8 @@ public class UsuarioDAO implements IUsuarioDAO {
 
 			pst.setString(1, pojo.getNombre());
 			pst.setString(2, pojo.getContrasenia());
-			pst.setString(3, pojo.getEmail());
-			pst.setString(4, pojo.getImagen());
+			pst.setString(3, pojo.getImagen());
+			pst.setString(4, pojo.getEmail());
 			pst.setInt(5, pojo.getId());
 
 			int affectedRows = pst.executeUpdate();

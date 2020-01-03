@@ -40,11 +40,29 @@
 							value="${producto.descripcion}" required="required"
 							class="form-control mb-2 p-2" />
 						<label>Usuario</label>
-						<select name="usuarioId" class="custom-select">
+						<select name="usuario_id" class="custom-select">
 							<c:forEach items="${usuarios}" var="u">
 								<option value="${u.id}" ${(u.id eq producto.usuario.id)?"selected":""}>${u.nombre}</option>
 							</c:forEach>
 						</select>
+						<c:if test="${producto.fechaCreacion!=null}">
+							<label for="fecha_creacion">Fecha de Creación</label>
+							<input type="text" name="fecha_creacion" placeholder="Fecha de creación del usuario"
+								value="${producto.fechaCreacion}" required="required"
+								readonly  class="form-control mb-2 p-2" />
+						</c:if>
+						<c:if test="${producto.fechaModificacion!=null}">
+							<label for="fecha_modificacion">Fecha de Modificación</label>
+							<input type="text" name="fecha_modificacion" placeholder="Fecha de última modificación del usuario"
+								value="${producto.fechaModificacion}"
+								readonly  class="form-control mb-2 p-2" />
+						</c:if>
+						<c:if test="${producto.fechaEliminacion!=null}">
+							<label for="fecha_eliminacion">Fecha de Eliminación</label>
+							<input type="text" name="fecha_eliminacion" placeholder="Fecha de Eliminación del usuario"
+								value="${producto.fechaEliminacion}"
+								readonly  class="form-control mb-2 p-2" />
+						</c:if>
 						<input type="hidden" name="idUsuario" value="${producto.usuario.id}" />
 						<input type="hidden" name="accion" value="guardar" />
 						<input class="btn btn-primary" type="submit" value="Inscribir">

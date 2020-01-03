@@ -23,6 +23,7 @@
 						<th>Precio</th>
 						<th>Descripción</th>
 						<th>Descuento</th>
+						<th>Fecha Última Modificación</th>
 						<th>Usuario</th>
 					</tr>
 				</thead>
@@ -34,6 +35,7 @@
 						<th>Precio</th>
 						<th>Descripción</th>
 						<th>Descuento</th>
+						<th>Fecha Última Modificación</th>
 						<th>Usuario</th>
 					</tr>
 				</tfoot>
@@ -47,6 +49,12 @@
 							<td>${p.precio}</td>
 							<td>${p.descripcion}</td>
 							<td>${p.descuento}</td>
+							<c:if test="${producto.fechaModificacion == null}">
+								<td>${p.fechaCreacion}</td>
+							</c:if>
+							<c:if test="${producto.fechaModificacion != null}">
+								<td>${p.fechaModificacion}</td>
+							</c:if>
 							<td>${p.usuario.nombre}</td>
 							<td><a
 								href="seguridad/productos?accion=formulario&id=${p.id}">Editar</a></td>

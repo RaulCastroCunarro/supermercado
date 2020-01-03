@@ -23,6 +23,8 @@
 						<th>Precio</th>
 						<th>Descripción</th>
 						<th>Descuento</th>
+						<th>Fecha Última Modificación</th>
+						<th>Usuario</th>
 					</tr>
 				</thead>
 				<tfoot>
@@ -33,6 +35,8 @@
 						<th>Precio</th>
 						<th>Descripción</th>
 						<th>Descuento</th>
+						<th>Fecha Última Modificación</th>
+						<th>Usuario</th>
 					</tr>
 				</tfoot>
 				<tbody>
@@ -45,6 +49,13 @@
 							<td>${p.precio}</td>
 							<td>${p.descripcion}</td>
 							<td>${p.descuento}</td>
+							<c:if test="${p.fechaModificacion == null}">
+								<td>${p.fechaCreacion}</td>
+							</c:if>
+							<c:if test="${p.fechaModificacion != null}">
+								<td>${p.fechaModificacion}</td>
+							</c:if>
+							<td>${p.usuario.nombre}</td>
 							<td><a
 								href="mipanel/productos?accion=formulario&id=${p.id}">Editar</a></td>
 						</tr>

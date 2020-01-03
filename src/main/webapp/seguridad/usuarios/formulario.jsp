@@ -33,7 +33,7 @@
 							value="${usuario.imagen}" required="required"
 							pattern="http(|s):.*\.(jpg|png|jpeg|gif)"
 							onblur="cargarImagen()" class="form-control mb-2 p-2" />
-						<select name="rol" class="form-control mb-2 p-2 custom-select">
+						<select name="rol_id" class="form-control mb-2 p-2 custom-select">
 							<option value="1"}>Usuario</option>
 							<option value="2"}>Administrador</option>
 						</select>

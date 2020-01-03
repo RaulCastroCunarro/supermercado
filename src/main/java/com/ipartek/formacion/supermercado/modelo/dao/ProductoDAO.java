@@ -84,8 +84,8 @@ public class ProductoDAO implements IDAO<Producto> {
 			"FROM producto p INNER JOIN usuario u " + 
 			"WHERE p.fecha_eliminacion IS NULL AND p.id_usuario = u.id AND p.id = ? " + 
 			"ORDER BY p.id DESC LIMIT 500;";
-	private static final String SQL_INSERT = "INSERT INTO producto (id, nombre, imagen, precio, descuento, descripcion, fecha_creacion, id_usuario) VALUES ( ? , ?, ?, ?, ?, ?, CURRENT_TIMESTAMP());";
-	private static final String SQL_UPDATE = "UPDATE producto SET nombre= ?, imagen=?, precio=?, descuento=?, descripcion=?, id_usuario=? WHERE id = ?;";
+	private static final String SQL_INSERT = "INSERT INTO producto (id, nombre, imagen, precio, descuento, descripcion, fecha_creacion, id_usuario) VALUES ( ? , ?, ?, ?, ?, ?, CURRENT_TIMESTAMP(), ?);";
+	private static final String SQL_UPDATE = "UPDATE producto SET nombre= ?, imagen=?, precio=?, descuento=?, descripcion=?, fecha_modificacion=CURRENT_TIMESTAMP(), id_usuario=? WHERE id = ?;";
 	private static final String SQL_DELETE = "DELETE FROM producto WHERE id = ?;";
 	private static final String SQL_DELETE_LOGICO = "UPDATE producto SET fecha_eliminacion = CURRENT_TIMESTAMP() WHERE id = ?;";
 
@@ -285,6 +285,7 @@ public class ProductoDAO implements IDAO<Producto> {
 	public Producto create(Producto pojo) throws Exception {
 		try (Connection con = ConnectionManager.getConnection();
 				PreparedStatement pst = con.prepareStatement(SQL_INSERT, Statement.RETURN_GENERATED_KEYS)) {
+		
 			pojo = sanitizar(pojo);
 
 			pst.setInt(1, pojo.getId());

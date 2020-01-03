@@ -2,12 +2,9 @@ package com.ipartek.formacion.supermercado.controller.seguridad;
 
 import java.util.List;
 import java.util.Set;
-import java.util.regex.Pattern;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Iterator;
-
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -21,10 +18,8 @@ import javax.validation.ValidatorFactory;
 import org.apache.log4j.Logger;
 
 import com.ipartek.formacion.supermercado.controller.Alerta;
-import com.ipartek.formacion.supermercado.modelo.dao.ProductoDAO;
 import com.ipartek.formacion.supermercado.modelo.dao.RolDAO;
 import com.ipartek.formacion.supermercado.modelo.dao.UsuarioDAO;
-import com.ipartek.formacion.supermercado.modelo.pojo.Producto;
 import com.ipartek.formacion.supermercado.modelo.pojo.Rol;
 import com.ipartek.formacion.supermercado.modelo.pojo.Usuario;
 import com.mysql.jdbc.exceptions.MySQLIntegrityConstraintViolationException;
@@ -39,9 +34,6 @@ public class UsuariosController extends HttpServlet {
 
 	private static final String VIEW_TABLA = "usuarios/index.jsp";
 	private static final String VIEW_FORM = "usuarios/formulario.jsp";
-	private static final int MIN_CAR = 2;
-	private static final int MAX_CAR = 150;
-	private static String FORWARD = VIEW_TABLA;
 
 	private static UsuarioDAO dao;
 	private static RolDAO daoRol;
@@ -60,20 +52,23 @@ public class UsuariosController extends HttpServlet {
 
 	String pAccion = "";
 
-	String pId = "";
+	int pId = 0;
 	String pNombre = "";
 	String pContrasenia = "";
 	String pEmail = "";
 	String pImagen = "";
-	String pFechaCreacion = "";
-	String pFechaModificacion = "";
-	String pFechaEliminacion = "";
-	String pRol = "";
+	Timestamp pFechaCreacion = null;
+	Timestamp pFechaModificacion = null;
+	Timestamp pFechaEliminacion = null;
+	Rol pRol = null;
+
+	Usuario pUsuario = null;
 
 	@Override
 	public void init() throws ServletException {
 		super.init();
 		dao = UsuarioDAO.getInstance();
+		daoRol = RolDAO.getInstance();
 		// Crear Factoria y Validador
 		factory = Validation.buildDefaultValidatorFactory();
 		validator = factory.getValidator();
@@ -83,6 +78,7 @@ public class UsuariosController extends HttpServlet {
 	public void destroy() {
 		super.destroy();
 		dao = null;
+		daoRol = null;
 		factory = null;
 		validator = null;
 	}
@@ -111,7 +107,7 @@ public class UsuariosController extends HttpServlet {
 		// recoger parametros
 		String pAccion = request.getParameter("accion");
 
-		mapper(request, response);
+		pUsuario = mapper(request, response);
 
 		try {
 			// TODO log
@@ -158,7 +154,7 @@ public class UsuariosController extends HttpServlet {
 			try {
 				id = Integer.parseInt(request.getParameter("id"));
 
-				if (pId != null) {
+				if (pUsuario.getId() != 0) {
 					usuarioForm = dao.getById(id);
 				}
 
@@ -183,59 +179,60 @@ public class UsuariosController extends HttpServlet {
 		return vista;
 	}
 
-	private void mapper(HttpServletRequest request, HttpServletResponse response) {
-		pId = request.getParameter("id");
+	private Usuario mapper(HttpServletRequest request, HttpServletResponse response) {
+		if (request.getParameter("id") != null) {
+			pId = Integer.parseInt(request.getParameter("id"));
+		}
+
 		pNombre = request.getParameter("nombre");
+
 		pContrasenia = request.getParameter("contrasenia");
 		pEmail = request.getParameter("email");
 		pImagen = request.getParameter("imagen");
-		pFechaCreacion = request.getParameter("fecha-creacion");
-		pFechaModificacion = request.getParameter("fecha-modificacion");
-		pFechaEliminacion = request.getParameter("fecha-eliminacion");
-		pRol = request.getParameter("rol");
 
+		String fechaCreacion = request.getParameter("fecha_creacion");
+		String fechaModificacion = request.getParameter("fecha_modificacion");
+		String fechaEliminacion = request.getParameter("fecha_eliminacion");
+
+		if (fechaCreacion != null) {
+			pFechaCreacion = Timestamp.valueOf(fechaCreacion);
+		} else {
+			pFechaCreacion = new Timestamp(System.currentTimeMillis());
+		}
+
+		if (fechaModificacion != null) {
+			pFechaModificacion = Timestamp.valueOf(fechaModificacion);
+		}
+
+		if (fechaEliminacion != null) {
+			pFechaEliminacion = Timestamp.valueOf(fechaEliminacion);
+		}
+
+		if (request.getParameter("rol") != null) {
+			pRol = daoRol.getById(Integer.parseInt(request.getParameter("rol")));
+		} else {
+			pRol = new Rol();
+		}
+		
+		Usuario resultado = new Usuario(pId, pNombre, pContrasenia, pEmail, pImagen, pFechaCreacion,
+				pFechaModificacion, pFechaEliminacion, pRol);
+		
+		return resultado;
 	}
 
 	private void eliminar(HttpServletRequest request, HttpServletResponse response) throws Exception {
-		int id = Integer.parseInt(request.getParameter("id"));
-		dao.delete(id);
+		
+		dao.delete(pUsuario.getId());
 		mensajes.clear();
 		vistaSeleccionada = operacionesVista(request, response, VIEW_TABLA);
 	}
 
 	private void guardar(HttpServletRequest request, HttpServletResponse response) throws Exception {
-		Timestamp fechaCrea = null;
-		Timestamp fechaMod = null;
-		Timestamp fechaElim = null;
-		Rol rol = null;
 
-		if (pFechaCreacion != null) {
-			fechaCrea = Timestamp.valueOf(pFechaCreacion);
-		}else {
-			fechaCrea = new Timestamp(System.currentTimeMillis());
-		}
-
-		if (pFechaModificacion != null) {
-			fechaMod = Timestamp.valueOf(pFechaModificacion);
-		}
-
-		if (pFechaEliminacion != null) {
-			fechaElim = Timestamp.valueOf(pFechaEliminacion);
-		}
-		
-		if (pRol != null) {
-			rol = daoRol.getById(Integer.parseInt(pRol));
-		}else {
-			rol = new Rol();
-		}
-
-		Usuario pGuardar = new Usuario(Integer.parseInt(pId), pNombre, pContrasenia, pEmail, pImagen, fechaCrea,
-				fechaMod, fechaElim, rol);
-
-		validator.validate(pGuardar);
+		validator.validate(pUsuario);
 
 		// Obtener las ConstrainViolation
-		Set<ConstraintViolation<Usuario>> violations = validator.validate(pGuardar);
+		Set<ConstraintViolation<Usuario>> violations = validator.validate(pUsuario);
 		if (violations.size() > 0) {
 			/* No ha pasado la valiadacion, iterar sobre los mensajes de validacion */
 			for (ConstraintViolation<Usuario> cv : violations) {
@@ -250,32 +247,29 @@ public class UsuariosController extends HttpServlet {
 			}
 			vistaSeleccionada = operacionesVista(request, response, VIEW_FORM);
 		} else {
-			int id = Integer.parseInt(pId);
-			String nombre = pNombre;
-			String contrasenia = pContrasenia;
-			String email = pEmail;
-			String imagen = pImagen;
-			Timestamp fechaCreacion = Timestamp.valueOf(pFechaCreacion);
-			Timestamp fechaModificacion = Timestamp.valueOf(pFechaModificacion);
-			Timestamp fechaEliminacion = Timestamp.valueOf(pFechaEliminacion);
-
+			
 			Usuario pojo = null;
 			List<Usuario> listado = dao.getAll();
-			if (id == 0) {
-				pojo = new Usuario(id, nombre, contrasenia, email, imagen, fechaCreacion, fechaModificacion,
-						fechaEliminacion, rol);
+			if (pUsuario.getId() == 0) {
+				
+				String sRolId = request.getParameter("rol_id");
+				int rolId = 0;
+				
+				if (sRolId != null) {
+					rolId = Integer.parseInt(sRolId);
+				}
+				
+				pojo = pUsuario;
+				pojo.setRol(daoRol.getById(rolId));
 				dao.create(pojo);
 			} else {
 				for (Usuario usuario : listado) {
-					if (usuario.getId() == id) {
-						usuario.setNombre(nombre);
-						usuario.setContrasenia(contrasenia);
-						usuario.setEmail(email);
-						usuario.setImagen(imagen);
-						usuario.setFechaCreacion(fechaCreacion);
-						usuario.setFechaModificacion(fechaModificacion);
-						usuario.setFechaEliminacion(fechaEliminacion);
-						usuario.setRol(rol);
+					if (usuario.getId() == pUsuario.getId()) {
+						usuario.setNombre(pUsuario.getNombre());
+						usuario.setContrasenia(pUsuario.getContrasenia());
+						usuario.setEmail(pUsuario.getEmail());
+						usuario.setImagen(pUsuario.getImagen());
+						usuario.setRol(pUsuario.getRol());
 						dao.update(usuario.getId(), usuario);
 					}
 				}
@@ -289,8 +283,8 @@ public class UsuariosController extends HttpServlet {
 	private void irFormulario(HttpServletRequest request, HttpServletResponse response) {
 		Usuario usuarioForm = null;
 
-		if (pId != null) {
-			usuarioForm = dao.getById(Integer.parseInt(pId));
+		if (pUsuario.getId() != 0) {
+			usuarioForm = dao.getById(pUsuario.getId());
 		}
 
 		if (usuarioForm == null) {

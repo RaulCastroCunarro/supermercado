@@ -78,7 +78,7 @@
 						id="navbarDropdown" role="button" data-toggle="dropdown"
 						aria-haspopup="true" aria-expanded="false"><!-- <img class="" src="${usuarioLogeado.getImagen()}" alt="Imagen de Perfil de ${usuarioLogeado.getNombre()}"></img> --></a>
 						<div class="dropdown-menu" aria-labelledby="navbarDropdown">
-							<a class="dropdown-item" href="">${usuarioLogeado.getNombre()}</a> <a
+							<a class="dropdown-item" href="seguridad/usuarios?accion=formulario&id=${usuarioLogeado.id}">${usuarioLogeado.getNombre()}</a> <a
 								class="dropdown-item" href="" data-toggle="modal"
 								data-target="#cerrarSesionModal">Logout <i
 								class="fas fa-sign-out-alt"></i></a>
@@ -99,7 +99,7 @@
 						id="navbarDropdown" role="button" data-toggle="dropdown"
 						aria-haspopup="true" aria-expanded="false"><!-- <img class="" src="${usuarioLogeado.getImagen()}" alt="Imagen de Perfil de ${usuarioLogeado.getNombre()}"></img> --></a>
 						<div class="dropdown-menu" aria-labelledby="navbarDropdown">
-							<a class="dropdown-item" href="">${usuarioLogeado.getNombre()}</a> <a
+							<a class="dropdown-item" href="mipanel/usuarios?accion=formulario&id=${usuarioLogeado.id}">${usuarioLogeado.getNombre()}</a> <a
 								class="dropdown-item" href="" data-toggle="modal"
 								data-target="#cerrarSesionModal">Logout <i
 								class="fas fa-sign-out-alt"></i></a>

@@ -1,7 +1,6 @@
 package com.ipartek.formacion.supermercado.modelo.pojo;
 
 import java.sql.Timestamp;
-import java.util.Calendar;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;

@@ -4,19 +4,11 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
-import java.sql.Timestamp;
 import java.util.ArrayList;
 
 import org.apache.log4j.Logger;
-import org.jsoup.Jsoup;
-import org.jsoup.safety.Whitelist;
-
 import com.ipartek.formacion.supermercado.modelo.ConnectionManager;
-import com.ipartek.formacion.supermercado.modelo.pojo.Producto;
 import com.ipartek.formacion.supermercado.modelo.pojo.Rol;
-//import com.ipartek.formacion.supermercado.modelo.pojo.Rol;
-import com.ipartek.formacion.supermercado.modelo.pojo.Usuario;
 
 public class RolDAO implements IDAO<Rol>{
 

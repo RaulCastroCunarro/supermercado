@@ -2,11 +2,9 @@ package com.ipartek.formacion.supermercado.controller.seguridad;
 
 import java.util.List;
 import java.util.Set;
-import java.util.regex.Pattern;
 import java.io.IOException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Iterator;
-
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -36,9 +34,6 @@ public class ProductosController extends HttpServlet {
 
 	private static final String VIEW_TABLA = "productos/index.jsp";
 	private static final String VIEW_FORM = "productos/formulario.jsp";
-	private static final int MIN_CAR = 2;
-	private static final int MAX_CAR = 150;
-	private static String FORWARD = VIEW_TABLA;
 
 	private static ProductoDAO daoProducto;
 	private static UsuarioDAO daoUsuario;
@@ -57,13 +52,18 @@ public class ProductosController extends HttpServlet {
 
 	String pAccion = "";
 
-	String pId = "";
+	int pId = 0;
 	String pNombre = "";
-	String pPrecio = "";
+	float pPrecio = 0;
 	String pImagen = "";
 	String pDescripcion = "";
-	String pDescuento = "";
+	int pDescuento = 0;
+	Timestamp pFechaCreacion = null;
+	Timestamp pFechaModificacion = null;
+	Timestamp pFechaEliminacion = null;
 	Usuario pUsuario = null;
+	
+	Producto pProducto = null;
 
 	@Override
 	public void init() throws ServletException {
@@ -108,7 +108,7 @@ public class ProductosController extends HttpServlet {
 		// recoger parametros
 		String pAccion = request.getParameter("accion");
 
-		mapper(request, response);
+		pProducto = mapper(request, response);
 
 		try {
 			// TODO log
@@ -134,7 +134,7 @@ public class ProductosController extends HttpServlet {
 				break;
 			}
 
-			request.setAttribute("productos", daoProducto.getAll());
+			//request.setAttribute("productos", daoProducto.getAll());
 		} catch (MySQLIntegrityConstraintViolationException e) {
 			mensajes.add(new Alerta("El nombre de ese producto ya existe.", Alerta.TIPO_DANGER));
 		} catch (Exception e) {
@@ -155,7 +155,7 @@ public class ProductosController extends HttpServlet {
 			try {
 				id = Integer.parseInt(request.getParameter("id"));
 
-				if (pId != null) {
+				if (pId != 0) {
 					productoForm = daoProducto.getById(id);
 				}
 
@@ -181,36 +181,68 @@ public class ProductosController extends HttpServlet {
 		return vista;
 	}
 
-	private void mapper(HttpServletRequest request, HttpServletResponse response) {
-		pId = request.getParameter("id");
+	private Producto mapper(HttpServletRequest request, HttpServletResponse response) {
+		
+		if (request.getParameter("id") != null) {
+			pId = Integer.parseInt(request.getParameter("id"));
+		}
+		
 		pNombre = request.getParameter("nombre");
-		pPrecio = request.getParameter("precio");
+		
+		if (request.getParameter("precio") != null) {
+			pPrecio = Float.parseFloat(request.getParameter("precio"));
+		}
+		
 		pImagen = request.getParameter("imagen");
 		pDescripcion = request.getParameter("descripcion");
-		pDescuento = request.getParameter("descuento");
+		
+		if(request.getParameter("descuento") != null){
+			pDescuento = Integer.parseInt(request.getParameter("descuento"));
+		}
+		
+		String fechaCreacion = request.getParameter("fecha_creacion");
+		String fechaModificacion = request.getParameter("fecha_modificacion");
+		String fechaEliminacion = request.getParameter("fecha_eliminacion");
+
+		if (fechaCreacion != null) {
+			pFechaCreacion = Timestamp.valueOf(fechaCreacion);
+		} else {
+			pFechaCreacion = new Timestamp(System.currentTimeMillis());
+		}
+
+		if (fechaModificacion != null) {
+			pFechaModificacion = Timestamp.valueOf(fechaModificacion);
+		}
+
+		if (fechaEliminacion != null) {
+			pFechaEliminacion = Timestamp.valueOf(fechaEliminacion);
+		}		
+		
 		if (request.getParameter("usuario") == null) {
 			if (request.getParameter("idUsuario") != null) {
 				pUsuario = daoUsuario.getById(Integer.parseInt(request.getParameter("idUsuario")));
 			}
 		}
+		
+		Producto resultado = new Producto(pId, pNombre, pPrecio, pImagen, pDescripcion, pDescuento, pFechaCreacion,
+				pFechaModificacion, pFechaEliminacion, pUsuario);
+
+		return resultado;
 	}
 
 	private void eliminar(HttpServletRequest request, HttpServletResponse response) throws Exception {
-		int id = Integer.parseInt(request.getParameter("id"));
-		daoProducto.delete(id);
+		
+		daoProducto.delete(pProducto.getId());
 		mensajes.clear();
 		vistaSeleccionada = operacionesVista(request, response, VIEW_TABLA);
 	}
 
 	private void guardar(HttpServletRequest request, HttpServletResponse response) throws Exception {
 
-		Producto pGuardar = new Producto(Integer.parseInt(pId), pNombre, Float.parseFloat(pPrecio), pImagen,
-				pDescripcion, Integer.parseInt(pDescuento), pUsuario);
-
-		validator.validate(pGuardar);
+		validator.validate(pProducto);
 
 		// Obtener las ConstrainViolation
-		Set<ConstraintViolation<Producto>> violations = validator.validate(pGuardar);
+		Set<ConstraintViolation<Producto>> violations = validator.validate(pProducto);
 		if (violations.size() > 0) {
 			/* No ha pasado la valiadacion, iterar sobre los mensajes de validacion */
 			for (ConstraintViolation<Producto> cv : violations) {
@@ -226,29 +258,28 @@ public class ProductosController extends HttpServlet {
 
 			vistaSeleccionada = operacionesVista(request, response, VIEW_FORM);
 		} else {
-			int id = Integer.parseInt(pId);
-			String nombre = pNombre;
-			float precio = Float.parseFloat(pPrecio);
-			String imagen = pImagen;
-			String descripcion = pDescripcion;
-			int descuento = Integer.parseInt(pDescuento);
 
 			Producto pojo = null;
 			List<Producto> listado = daoProducto.getAll();
-			if (id == 0) {
-				pojo = new Producto(nombre, precio, imagen, descripcion, descuento);
+			if (pProducto.getId() == 0) {
+				String sUsuarioId = request.getParameter("usuario_id");
+				int usuarioId = 0;
+				
+				if (sUsuarioId != null) {
+					usuarioId = Integer.parseInt(sUsuarioId);
+				}
+				
+				pojo = pProducto;
+				pojo.setUsuario(daoUsuario.getById(usuarioId));
 				daoProducto.create(pojo);
 			} else {
 				for (Producto producto : listado) {
-					if (producto.getId() == id) {
-						producto.setNombre(nombre);
-						producto.setImagen(imagen);
-						producto.setDescripcion(descripcion);
-						producto.setDescuento(descuento);
-						producto.setPrecio(precio);
-						producto.setFechaCreacion(producto.getFechaCreacion());
-						producto.setFechaModificacion(producto.getFechaModificacion());
-						producto.setFechaEliminacion(producto.getFechaEliminacion());
+					if (producto.getId() == pProducto.getId()) {
+						producto.setNombre(pProducto.getNombre());
+						producto.setImagen(pProducto.getImagen());
+						producto.setDescripcion(pProducto.getDescripcion());
+						producto.setDescuento(pProducto.getDescuento());
+						producto.setPrecio(pProducto.getPrecio());
 						daoProducto.update(producto.getId(), producto);
 					}
 				}
@@ -262,8 +293,8 @@ public class ProductosController extends HttpServlet {
 	private void irFormulario(HttpServletRequest request, HttpServletResponse response) {
 		Producto productoForm = null;
 
-		if (pId != null) {
-			productoForm = daoProducto.getById(Integer.parseInt(pId));
+		if (pProducto.getId() != 0) {
+			productoForm = daoProducto.getById(pId);
 		}
 
 		if (productoForm == null) {

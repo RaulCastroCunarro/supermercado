@@ -2,12 +2,9 @@ package com.ipartek.formacion.supermercado.controller.mipanel;
 
 import java.util.List;
 import java.util.Set;
-import java.util.regex.Pattern;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Iterator;
-
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -22,10 +19,8 @@ import javax.validation.ValidatorFactory;
 import org.apache.log4j.Logger;
 
 import com.ipartek.formacion.supermercado.controller.Alerta;
-import com.ipartek.formacion.supermercado.modelo.dao.ProductoDAO;
 import com.ipartek.formacion.supermercado.modelo.dao.RolDAO;
 import com.ipartek.formacion.supermercado.modelo.dao.UsuarioDAO;
-import com.ipartek.formacion.supermercado.modelo.pojo.Producto;
 import com.ipartek.formacion.supermercado.modelo.pojo.Rol;
 import com.ipartek.formacion.supermercado.modelo.pojo.Usuario;
 import com.mysql.jdbc.exceptions.MySQLIntegrityConstraintViolationException;
@@ -40,9 +35,6 @@ public class UsuariosController extends HttpServlet {
 
 	private static final String VIEW_TABLA = "usuarios/index.jsp";
 	private static final String VIEW_FORM = "usuarios/formulario.jsp";
-	private static final int MIN_CAR = 2;
-	private static final int MAX_CAR = 150;
-	private static String FORWARD = VIEW_TABLA;
 
 	private static UsuarioDAO dao;
 	private static RolDAO daoRol;
@@ -115,7 +107,7 @@ public class UsuariosController extends HttpServlet {
 		Usuario usuarioSesion = (Usuario)session.getAttribute("usuarioLogeado");
 		int idSesion = usuarioSesion.getId();
 
-		doRecogerDatos(request, response);
+		mapper(request, response);
 
 		try {
 			// TODO log
@@ -191,7 +183,7 @@ public class UsuariosController extends HttpServlet {
 		return vista;
 	}
 
-	private void doRecogerDatos(HttpServletRequest request, HttpServletResponse response) {
+	private void mapper(HttpServletRequest request, HttpServletResponse response) {
 		pId = request.getParameter("id");
 		pNombre = request.getParameter("nombre");
 		pContrasenia = request.getParameter("contrasenia");
@@ -237,7 +229,7 @@ public class UsuariosController extends HttpServlet {
 		}
 		
 		Usuario pGuardar = new Usuario(Integer.parseInt(pId), pNombre, pContrasenia, pEmail, pImagen,
-				Timestamp.valueOf(pFechaCreacion), fechaMod,
+				fechaCrea, fechaMod,
 				fechaElim, rol);
 
 		validator.validate(pGuardar);

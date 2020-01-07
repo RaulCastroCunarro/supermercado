@@ -53,19 +53,26 @@ public class UsuariosController extends HttpServlet {
 
 	String pAccion = "";
 
-	String pId = "";
+	int pId = 0;
 	String pNombre = "";
 	String pContrasenia = "";
 	String pEmail = "";
 	String pImagen = "";
-	String pFechaCreacion = "";
-	String pFechaModificacion = "";
-	String pFechaEliminacion = "";
-	String pRol = "";
+	Timestamp pFechaCreacion = null;
+	Timestamp pFechaModificacion = null;
+	Timestamp pFechaEliminacion = null;
+	Rol pRol = null;
+	
+	Usuario pUsuario = null;
+	
+	Usuario usuarioSesion = null;
 
 	@Override
 	public void init() throws ServletException {
 		super.init();
+		
+		LOG.debug("Entra en el init");
+		
 		dao = UsuarioDAO.getInstance();
 		// Crear Factoria y Validador
 		factory = Validation.buildDefaultValidatorFactory();
@@ -75,6 +82,9 @@ public class UsuariosController extends HttpServlet {
 	@Override
 	public void destroy() {
 		super.destroy();
+
+		LOG.debug("Entra en el init");
+		
 		dao = null;
 		factory = null;
 		validator = null;
@@ -97,20 +107,73 @@ public class UsuariosController extends HttpServlet {
 			throws ServletException, IOException {
 		doAction(request, response);
 	}
+	
+	@Override
+	protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		LOG.debug("Entra en el Service");
+		
+		
+		HttpSession session = req.getSession();
+		usuarioSesion = (Usuario) session.getAttribute("usuarioLogeado");
+		LOG.debug("Carga la sesión del Usuario");
+		
+		pUsuario = mapper(req, resp);
+		
+		pAccion = req.getParameter("accion");
+		LOG.debug("accion: " + pAccion);
+	}
+	
+	private Usuario mapper(HttpServletRequest request, HttpServletResponse response) {
+		
+		LOG.debug("Entra en el mapper");
+		
+		if (request.getParameter("id") != null) {
+			pId = Integer.parseInt(request.getParameter("id"));
+		}
+
+		pNombre = request.getParameter("nombre");
+
+		pContrasenia = request.getParameter("contrasenia");
+		pEmail = request.getParameter("email");
+		pImagen = request.getParameter("imagen");
+
+		String fechaCreacion = request.getParameter("fecha_creacion");
+		String fechaModificacion = request.getParameter("fecha_modificacion");
+		String fechaEliminacion = request.getParameter("fecha_eliminacion");
+
+		if (fechaCreacion != null) {
+			pFechaCreacion = Timestamp.valueOf(fechaCreacion);
+		} else {
+			pFechaCreacion = new Timestamp(System.currentTimeMillis());
+		}
+
+		if (fechaModificacion != null) {
+			pFechaModificacion = Timestamp.valueOf(fechaModificacion);
+		}
+
+		if (fechaEliminacion != null) {
+			pFechaEliminacion = Timestamp.valueOf(fechaEliminacion);
+		}
+
+		if (request.getParameter("rol") != null) {
+			pRol = daoRol.getById(Integer.parseInt(request.getParameter("rol")));
+		} else {
+			pRol = new Rol();
+		}
+		
+		Usuario resultado = new Usuario(pId, pNombre, pContrasenia, pEmail, pImagen, pFechaCreacion,
+				pFechaModificacion, pFechaEliminacion, pRol);
+		
+		LOG.debug("Devuelve el Usuario mapeado");
+		return resultado;
+	}
 
 	private void doAction(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 
-		// recoger parametros
-		String pAccion = request.getParameter("accion");
-		HttpSession session = request.getSession();
-		Usuario usuarioSesion = (Usuario)session.getAttribute("usuarioLogeado");
-		int idSesion = usuarioSesion.getId();
-
-		mapper(request, response);
-
+		LOG.debug("Entra en el doAction; accion " + pAccion);
+		
 		try {
-			// TODO log
 			switch (pAccion) {
 			case ACCION_LISTAR:
 				listar(request, response);
@@ -133,11 +196,10 @@ public class UsuariosController extends HttpServlet {
 				break;
 			}
 
-			request.setAttribute("productos", dao.getAllByUser(idSesion));
 		} catch (MySQLIntegrityConstraintViolationException e) {
 			mensajes.add(new Alerta("El nombre de ese producto ya existe.", Alerta.TIPO_DANGER));
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
+			LOG.error(e);
 			e.printStackTrace();
 		} finally {
 			request.setAttribute("mensajesAlerta", mensajes);
@@ -147,96 +209,67 @@ public class UsuariosController extends HttpServlet {
 	}
 
 	private String operacionesVista(HttpServletRequest request, HttpServletResponse response, String destino) {
+
+		LOG.debug("Entra en operacionVista");
+		
 		String vista = "";
 		HttpSession session = request.getSession();
 		Usuario usuarioSesion = (Usuario)session.getAttribute("usuarioLogeado");
 		int idSesion = usuarioSesion.getId();
 		
 		if (destino.equals(VIEW_FORM)) {
-			int id;
 			Usuario usuarioForm = null;
 			try {
-				id = Integer.parseInt(request.getParameter("id"));
-
-				if (pId != null) {
-					usuarioForm = dao.getById(id);
+				if (pId != 0) {
+					LOG.debug("Recupera el Usuario por su Id");
+					usuarioForm = dao.getById(pUsuario.getId());
 				}
 
 				if (usuarioForm == null) {
+					LOG.debug("Genera un nuevo Usuario");
 					usuarioForm = new Usuario();
 				}
 			} catch (NumberFormatException e) {
+				LOG.error(e);
 				if (usuarioForm == null) {
+					LOG.debug("Genera un nuevo Usuario");
 					usuarioForm = new Usuario();
 				}
 			}
 
+			LOG.debug("Pasa el Usuario a la request");
 			request.setAttribute("usuario", usuarioForm);
 
 			vista = destino;
 		}
 
 		if (destino.equals(VIEW_TABLA)) {
+			LOG.debug("Pasa la lista de Usuarios a la request");
 			request.setAttribute("usuarios", dao.getAllByUser(idSesion));
 			vista = destino;
 		}
 		return vista;
 	}
 
-	private void mapper(HttpServletRequest request, HttpServletResponse response) {
-		pId = request.getParameter("id");
-		pNombre = request.getParameter("nombre");
-		pContrasenia = request.getParameter("contrasenia");
-		pEmail = request.getParameter("email");
-		pImagen = request.getParameter("imagen");
-		pFechaCreacion = request.getParameter("fecha-creacion");
-		pFechaModificacion = request.getParameter("fecha-modificacion");
-		pFechaEliminacion = request.getParameter("fecha-eliminacion");
-		pRol = request.getParameter("rol");
-	}
-
 	private void eliminar(HttpServletRequest request, HttpServletResponse response) throws Exception {
-		int id = Integer.parseInt(request.getParameter("id"));
-		dao.delete(id);
+
+		LOG.debug("Entra en eliminar");
+		
+		dao.delete(pUsuario.getId());
 		mensajes.clear();
 		vistaSeleccionada = operacionesVista(request, response, VIEW_TABLA);
 	}
 
 	private void guardar(HttpServletRequest request, HttpServletResponse response) throws Exception {
-		Timestamp fechaCrea = null;
-		Timestamp fechaMod = null;
-		Timestamp fechaElim = null;
-		Rol rol = null;
-		
-		if (pFechaCreacion != null) {
-			fechaCrea = Timestamp.valueOf(pFechaCreacion);
-		}else {
-			fechaCrea = new Timestamp(System.currentTimeMillis());
-		}
-		
-		if (pFechaModificacion != null) {
-			fechaMod = Timestamp.valueOf(pFechaModificacion);
-		}
-		
-		if (pFechaEliminacion != null) {
-			fechaElim = Timestamp.valueOf(pFechaEliminacion);
-		}
-		
-		if (pRol != null) {
-			rol = daoRol.getById(Integer.parseInt(pRol));
-		}else {
-			rol = new Rol();
-		}
-		
-		Usuario pGuardar = new Usuario(Integer.parseInt(pId), pNombre, pContrasenia, pEmail, pImagen,
-				fechaCrea, fechaMod,
-				fechaElim, rol);
 
-		validator.validate(pGuardar);
+		LOG.debug("entra en guardar");
+		
+		validator.validate(pUsuario);
 
 		// Obtener las ConstrainViolation
-		Set<ConstraintViolation<Usuario>> violations = validator.validate(pGuardar);
+		Set<ConstraintViolation<Usuario>> violations = validator.validate(pUsuario);
 		if (violations.size() > 0) {
+			LOG.debug("No pasa las validaciones");
 			/* No ha pasado la valiadacion, iterar sobre los mensajes de validacion */
 			for (ConstraintViolation<Usuario> cv : violations) {
 				char[] caracteres = cv.getPropertyPath().toString().toCharArray();
@@ -250,35 +283,35 @@ public class UsuariosController extends HttpServlet {
 			}
 			vistaSeleccionada = operacionesVista(request, response, VIEW_FORM);
 		} else {
-			int id = Integer.parseInt(pId);
-			String nombre = pNombre;
-			String contrasenia = pContrasenia;
-			String email = pEmail;
-			String imagen = pImagen;
-			Timestamp fechaCreacion = Timestamp.valueOf(pFechaCreacion);
-			Timestamp fechaModificacion = Timestamp.valueOf(pFechaModificacion);
-			Timestamp fechaEliminacion = Timestamp.valueOf(pFechaEliminacion);
-			
-			HttpSession session = request.getSession();
-			Usuario usuarioSesion = (Usuario)session.getAttribute("usuarioLogeado");
-			int idSesion = usuarioSesion.getId();
 
+			LOG.debug("Validaciones correctas");
+			
 			Usuario pojo = null;
-			List<Usuario> listado = dao.getAllByUser(idSesion);
-			if (id == 0) {
-				pojo = new Usuario(id, nombre, contrasenia, email, imagen, fechaCreacion, fechaModificacion, fechaEliminacion, rol);
+			List<Usuario> listado = dao.getAllByUser(usuarioSesion.getId());
+			if (pUsuario.getId() == 0) {
+				String sRolId = request.getParameter("rol_id");
+				int rolId = 0;
+				
+				if (sRolId != null) {
+					rolId = Integer.parseInt(sRolId);
+				}
+				
+				pojo = pUsuario;
+				pojo.setRol(daoRol.getById(rolId));
+				LOG.debug("Crea un Usuario nuevo");
 				dao.create(pojo);
 			} else {
+				LOG.debug("Itera para encontrar el Usuario correcto");
 				for (Usuario usuario : listado) {
-					if (usuario.getId() == id) {
-						usuario.setNombre(nombre);
-						usuario.setContrasenia(contrasenia);
-						usuario.setEmail(email);
-						usuario.setImagen(imagen);
-						usuario.setFechaCreacion(fechaCreacion);
-						usuario.setFechaModificacion(fechaModificacion);
-						usuario.setFechaEliminacion(fechaEliminacion);
-						dao.update(usuario.getId(), usuario);
+					if (usuario.getId() == pUsuario.getId()) {
+						LOG.debug("Encuentra el id correcto");
+						usuario.setNombre(pUsuario.getNombre());
+						usuario.setContrasenia(pUsuario.getContrasenia());
+						usuario.setEmail(pUsuario.getEmail());
+						usuario.setImagen(pUsuario.getImagen());
+						usuario.setRol(pUsuario.getRol());
+						LOG.debug("Modifica el usuario");
+						dao.update(pUsuario.getId(), usuario);
 					}
 				}
 			}
@@ -289,10 +322,12 @@ public class UsuariosController extends HttpServlet {
 	}
 
 	private void irFormulario(HttpServletRequest request, HttpServletResponse response) {
+		LOG.debug("Entra en irFormulario");
+
 		Usuario usuarioForm = null;
 
-		if (pId != null) {
-			usuarioForm = dao.getById(Integer.parseInt(pId));
+		if (pUsuario.getId() != 0) {
+			usuarioForm = dao.getById(pUsuario.getId());
 		}
 
 		if (usuarioForm == null) {
@@ -304,11 +339,12 @@ public class UsuariosController extends HttpServlet {
 	}
 
 	private void listar(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		HttpSession session = request.getSession();
-		Usuario usuarioSesion = (Usuario)session.getAttribute("usuarioLogeado");
-		int idSesion = usuarioSesion.getId();
 		
-		request.setAttribute("usuarios", dao.getAllByUser(idSesion));
+		LOG.debug("Entra en listar");
+		
+		request.setAttribute("usuarios", dao.getAllByUser(pUsuario.getId()));
+		LOG.debug("Pasa el listado de Usuarios a la request");
+		
 		mensajes.clear();
 		vistaSeleccionada = operacionesVista(request, response, VIEW_TABLA);
 	}

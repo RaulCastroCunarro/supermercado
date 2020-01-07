@@ -3,6 +3,7 @@ package com.ipartek.formacion.supermercado.controller.mipanel;
 import java.util.List;
 import java.util.Set;
 import java.io.IOException;
+import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import javax.servlet.ServletException;
@@ -20,6 +21,7 @@ import org.apache.log4j.Logger;
 
 import com.ipartek.formacion.supermercado.controller.Alerta;
 import com.ipartek.formacion.supermercado.modelo.dao.ProductoDAO;
+import com.ipartek.formacion.supermercado.modelo.dao.ProductoException;
 import com.ipartek.formacion.supermercado.modelo.dao.UsuarioDAO;
 import com.ipartek.formacion.supermercado.modelo.pojo.Producto;
 import com.ipartek.formacion.supermercado.modelo.pojo.Usuario;
@@ -71,6 +73,9 @@ public class ProductosController extends HttpServlet {
 	@Override
 	public void init() throws ServletException {
 		super.init();
+		
+		LOG.debug("Entra en el init");
+		
 		daoProducto = ProductoDAO.getInstance();
 		daoUsuario = UsuarioDAO.getInstance();
 		// Crear Factoria y Validador
@@ -81,6 +86,9 @@ public class ProductosController extends HttpServlet {
 	@Override
 	public void destroy() {
 		super.destroy();
+		
+		LOG.debug("Entra en el destroy");
+		
 		daoProducto = null;
 		daoUsuario = null;
 		factory = null;
@@ -107,24 +115,29 @@ public class ProductosController extends HttpServlet {
 
 	@Override
 	protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		LOG.debug("Entra en el Service");
+		
+		
 		HttpSession session = req.getSession();
 		usuarioSesion = (Usuario) session.getAttribute("usuarioLogeado");
+		LOG.debug("Carga la sesión del Usuario");
 		
 		pProducto = mapper(req, resp);
 		
-		String pAccion = req.getParameter("accion");
-		if (pAccion == ACCION_FORM || pAccion == ACCION_ELIMINAR || pAccion == ACCION_GUARDAR) {
-			if (enPropiedad()) {
-				super.service(req, resp);
-			}else {
-				resp.sendRedirect("/logout");
-			}
-		} else {
-			super.service(req, resp);
-		}
+		pAccion = req.getParameter("accion");
+		LOG.debug("accion: " + pAccion);
+//		if (pAccion == ACCION_FORM || pAccion == ACCION_ELIMINAR || pAccion == ACCION_GUARDAR) {
+//			if (enPropiedad()) {
+//				super.service(req, resp);
+//			}else {
+//				resp.sendRedirect("/logout");
+//			}
+//		} else {
+//			super.service(req, resp);
+//		}
 	}
 
-	private boolean enPropiedad() {
+	/*private boolean enPropiedad() {
 		
 		boolean resultado = false;
 		
@@ -139,90 +152,11 @@ public class ProductosController extends HttpServlet {
 		}
 		
 		return resultado;
-	}
-
-	private void doAction(HttpServletRequest request, HttpServletResponse response)
-			throws ServletException, IOException {
-
-		// recoger parametros
-		String pAccion = request.getParameter("accion");
-
-		try {
-			// TODO log
-			switch (pAccion) {
-			case ACCION_LISTAR:
-				listar(request, response);
-				break;
-
-			case ACCION_FORM:
-				irFormulario(request, response);
-				break;
-
-			case ACCION_GUARDAR:
-				guardar(request, response);
-				break;
-
-			case ACCION_ELIMINAR:
-				eliminar(request, response);
-				break;
-
-			default:
-				listar(request, response);
-				break;
-			}
-
-		} catch (MySQLIntegrityConstraintViolationException e) {
-			mensajes.add(new Alerta("El nombre de ese producto ya existe.", Alerta.TIPO_DANGER));
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} finally {
-			request.setAttribute("mensajesAlerta", mensajes);
-
-			request.getRequestDispatcher(vistaSeleccionada).forward(request, response);
-		}
-	}
-
-	private String operacionesVista(HttpServletRequest request, HttpServletResponse response, String destino) {
-
-		HttpSession session = request.getSession();
-		Usuario usuarioSesion = (Usuario) session.getAttribute("usuarioLogeado");
-		int idUsuSesion = usuarioSesion.getId();
-
-		String vista = "";
-		if (destino.equals(VIEW_FORM)) {
-			int id;
-			Producto productoForm = null;
-			try {
-				id = Integer.parseInt(request.getParameter("id"));
-
-				if (pId != 0) {
-					productoForm = daoProducto.getById(id);
-				}
-
-				if (productoForm == null) {
-					productoForm = new Producto();
-				}
-			} catch (NumberFormatException e) {
-				if (productoForm == null) {
-					productoForm = new Producto();
-				}
-			}
-
-			request.setAttribute("usuarios", daoUsuario.getAllByUser(idUsuSesion));
-			request.setAttribute("producto", productoForm);
-
-			vista = destino;
-		}
-
-		if (destino.equals(VIEW_TABLA)) {
-			request.setAttribute("productos", daoProducto.getAllByUser(idUsuSesion));
-			vista = destino;
-		}
-		return vista;
-	}
+	}*/
 
 	private Producto mapper(HttpServletRequest request, HttpServletResponse response) {
+		LOG.debug("Entra en el mapper");
+		
 		if (request.getParameter("id") != null) {
 			pId = Integer.parseInt(request.getParameter("id"));
 		}
@@ -267,23 +201,113 @@ public class ProductosController extends HttpServlet {
 		Producto resultado = new Producto(pId, pNombre, pPrecio, pImagen, pDescripcion, pDescuento, pFechaCreacion,
 				pFechaModificacion, pFechaEliminacion, pUsuario);
 
+		LOG.debug("Devuelve el Producto mapeado");
 		return resultado;
+	}
+	
+	private void doAction(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+
+		LOG.debug("Entra en el doAction; accion: " + pAccion);
+		
+		try {
+			switch (pAccion) {
+			case ACCION_LISTAR:
+				listar(request, response);
+				break;
+
+			case ACCION_FORM:
+				irFormulario(request, response);
+				break;
+
+			case ACCION_GUARDAR:
+				guardar(request, response);
+				break;
+
+			case ACCION_ELIMINAR:
+				eliminar(request, response);
+				break;
+
+			default:
+				listar(request, response);
+				break;
+			}
+
+		} catch (MySQLIntegrityConstraintViolationException e) {
+			mensajes.add(new Alerta("El nombre de ese producto ya existe.", Alerta.TIPO_DANGER));
+		} catch (ProductoException e) {
+			LOG.error(e);
+			e.printStackTrace();
+		} catch (Exception e) {
+			LOG.error(e);
+			e.printStackTrace();
+		} finally {
+			request.setAttribute("mensajesAlerta", mensajes);
+			request.getRequestDispatcher(vistaSeleccionada).forward(request, response);
+		}
+	}
+
+	private String operacionesVista(HttpServletRequest request, HttpServletResponse response, String destino) throws ProductoException {
+
+		LOG.debug("Entra en operacionVista");
+		int idUsuSesion = usuarioSesion.getId();
+
+		String vista = "";
+		
+		if (destino.equals(VIEW_FORM)) {
+			
+			Producto productoForm = null;
+			
+			try {
+
+				if (pId != 0) {
+					LOG.debug("Recupera el Producto por su Id");
+					productoForm = daoProducto.getByIdByUser(pId,usuarioSesion.getId());
+				}
+
+				if (productoForm == null) {
+					LOG.debug("Genera un nuevo Producto");
+					productoForm = new Producto();
+				}
+			} catch (NumberFormatException e) {
+				if (productoForm == null) {
+					LOG.debug("Genera un nuevo Producto");
+					productoForm = new Producto();
+				}
+			}
+
+			LOG.debug("Pasa el Usuario y los Productos a la request");
+			request.setAttribute("usuarios", daoUsuario.getById(idUsuSesion));
+			request.setAttribute("producto", productoForm);
+			vista = destino;
+		}
+
+		if (destino.equals(VIEW_TABLA)) {
+			LOG.debug("Pasa la lista de Productos del Usuario a la request");
+			request.setAttribute("productos", daoProducto.getAllByUser(idUsuSesion));
+			vista = destino;
+		}
+		return vista;
 	}
 
 	private void eliminar(HttpServletRequest request, HttpServletResponse response) throws Exception {
-
-		daoProducto.delete(pProducto.getId());
+		LOG.debug("Entra en eliminar");
+		
+		daoProducto.deleteByUser(pProducto.getId(), usuarioSesion.getId());
 		mensajes.clear();
 		vistaSeleccionada = operacionesVista(request, response, VIEW_TABLA);
 	}
 
-	private void guardar(HttpServletRequest request, HttpServletResponse response) throws Exception {
+	private void guardar(HttpServletRequest request, HttpServletResponse response) throws ProductoException, SQLException {
 
+		LOG.debug("entra en guardar");
+		
 		validator.validate(pProducto);
 
 		// Obtener las ConstrainViolation
 		Set<ConstraintViolation<Producto>> violations = validator.validate(pProducto);
 		if (violations.size() > 0) {
+			LOG.debug("No pasa las validaciones");
 			/* No ha pasado la valiadacion, iterar sobre los mensajes de validacion */
 			for (ConstraintViolation<Producto> cv : violations) {
 				char[] caracteres = cv.getPropertyPath().toString().toCharArray();
@@ -298,22 +322,29 @@ public class ProductosController extends HttpServlet {
 
 			vistaSeleccionada = operacionesVista(request, response, VIEW_FORM);
 		} else {
-
+			
+			LOG.debug("Validaciones correctas");
+			
 			Producto pojo = null;
 			List<Producto> listado = daoProducto.getAllByUser(usuarioSesion.getId());
+			
 			if (pProducto.getId() == 0) {
+				LOG.debug("Crea un Producto nuevo");
 				pojo = pProducto;
 				daoProducto.create(pojo);
 			} else {
+				LOG.debug("Itera para encontrar el Producto correcto");
 				for (Producto producto : listado) {
 					if (producto.getId() == pProducto.getId()) {
+						LOG.debug("Encuentra el id correcto");
 						producto.setNombre(pProducto.getNombre());
 						producto.setImagen(pProducto.getImagen());
 						producto.setDescripcion(pProducto.getDescripcion());
 						producto.setDescuento(pProducto.getDescuento());
 						producto.setPrecio(pProducto.getPrecio());
 						producto.setFechaModificacion(new Timestamp(System.currentTimeMillis()));
-						daoProducto.update(producto.getId(), producto);
+						LOG.debug("Modifica el producto");
+						daoProducto.updateByUser(producto.getId(), usuarioSesion.getId(), producto);
 					}
 				}
 			}
@@ -323,24 +354,21 @@ public class ProductosController extends HttpServlet {
 		request.setAttribute("mensajesAlerta", mensajes);
 	}
 
-	private void irFormulario(HttpServletRequest request, HttpServletResponse response) {
-		Producto productoForm = null;
+	private void irFormulario(HttpServletRequest request, HttpServletResponse response) throws ProductoException {
 
-		if (pId != 0) {
-			productoForm = daoProducto.getById(pId);
-		}
-
-		if (productoForm == null) {
-			productoForm = new Producto();
-		}
+		LOG.debug("Entra en irFormulario");
 
 		mensajes.clear();
 		vistaSeleccionada = operacionesVista(request, response, VIEW_FORM);
 	}
 
-	private void listar(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+	private void listar(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException, ProductoException {
+		
+		LOG.debug("Entra en listar");
 		
 		request.setAttribute("productos", daoProducto.getAllByUser(usuarioSesion.getId()));
+		LOG.debug("Pasa el listado de productos a la request");
+		
 		mensajes.clear();
 		vistaSeleccionada = operacionesVista(request, response, VIEW_TABLA);
 	}

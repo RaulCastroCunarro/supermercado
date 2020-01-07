@@ -10,6 +10,7 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
@@ -19,6 +20,7 @@ import org.apache.log4j.Logger;
 
 import com.ipartek.formacion.supermercado.controller.Alerta;
 import com.ipartek.formacion.supermercado.modelo.dao.ProductoDAO;
+import com.ipartek.formacion.supermercado.modelo.dao.ProductoException;
 import com.ipartek.formacion.supermercado.modelo.dao.UsuarioDAO;
 import com.ipartek.formacion.supermercado.modelo.pojo.Producto;
 import com.ipartek.formacion.supermercado.modelo.pojo.Usuario;
@@ -64,6 +66,8 @@ public class ProductosController extends HttpServlet {
 	Usuario pUsuario = null;
 	
 	Producto pProducto = null;
+	
+	Usuario usuarioSesion = null;
 
 	@Override
 	public void init() throws ServletException {
@@ -102,86 +106,24 @@ public class ProductosController extends HttpServlet {
 		doAction(request, response);
 	}
 
-	private void doAction(HttpServletRequest request, HttpServletResponse response)
-			throws ServletException, IOException {
-
-		// recoger parametros
-		String pAccion = request.getParameter("accion");
-
-		pProducto = mapper(request, response);
-
-		try {
-			// TODO log
-			switch (pAccion) {
-			case ACCION_LISTAR:
-				listar(request, response);
-				break;
-
-			case ACCION_FORM:
-				irFormulario(request, response);
-				break;
-
-			case ACCION_GUARDAR:
-				guardar(request, response);
-				break;
-
-			case ACCION_ELIMINAR:
-				eliminar(request, response);
-				break;
-
-			default:
-				listar(request, response);
-				break;
-			}
-
-			//request.setAttribute("productos", daoProducto.getAll());
-		} catch (MySQLIntegrityConstraintViolationException e) {
-			mensajes.add(new Alerta("El nombre de ese producto ya existe.", Alerta.TIPO_DANGER));
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} finally {
-			request.setAttribute("mensajesAlerta", mensajes);
-
-			request.getRequestDispatcher(vistaSeleccionada).forward(request, response);
-		}
+	@Override
+	protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		LOG.debug("Entra en el Service");
+		
+		
+		HttpSession session = req.getSession();
+		usuarioSesion = (Usuario) session.getAttribute("usuarioLogeado");
+		LOG.debug("Carga la sesión del Usuario");
+		
+		pProducto = mapper(req, resp);
+		
+		pAccion = req.getParameter("accion");
+		LOG.debug("accion: " + pAccion);
 	}
-
-	private String operacionesVista(HttpServletRequest request, HttpServletResponse response, String destino) {
-		String vista = "";
-		if (destino.equals(VIEW_FORM)) {
-			int id;
-			Producto productoForm = null;
-			try {
-				id = Integer.parseInt(request.getParameter("id"));
-
-				if (pId != 0) {
-					productoForm = daoProducto.getById(id);
-				}
-
-				if (productoForm == null) {
-					productoForm = new Producto();
-				}
-			} catch (NumberFormatException e) {
-				if (productoForm == null) {
-					productoForm = new Producto();
-				}
-			}
-
-			request.setAttribute("usuarios", daoUsuario.getAll());
-			request.setAttribute("producto", productoForm);
-
-			vista = destino;
-		}
-
-		if (destino.equals(VIEW_TABLA)) {
-			request.setAttribute("productos", daoProducto.getAll());
-			vista = destino;
-		}
-		return vista;
-	}
-
+	
 	private Producto mapper(HttpServletRequest request, HttpServletResponse response) {
+		
+		LOG.debug("Entra en el mapper");
 		
 		if (request.getParameter("id") != null) {
 			pId = Integer.parseInt(request.getParameter("id"));
@@ -227,10 +169,98 @@ public class ProductosController extends HttpServlet {
 		Producto resultado = new Producto(pId, pNombre, pPrecio, pImagen, pDescripcion, pDescuento, pFechaCreacion,
 				pFechaModificacion, pFechaEliminacion, pUsuario);
 
+		LOG.debug("Devuelve el Producto mapeado");
+		
 		return resultado;
+	}
+	
+	private void doAction(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+
+		LOG.debug("Entra en el doAction; accion: " + pAccion);
+		
+		try {
+			// TODO log
+			switch (pAccion) {
+			case ACCION_LISTAR:
+				listar(request, response);
+				break;
+
+			case ACCION_FORM:
+				irFormulario(request, response);
+				break;
+
+			case ACCION_GUARDAR:
+				guardar(request, response);
+				break;
+
+			case ACCION_ELIMINAR:
+				eliminar(request, response);
+				break;
+
+			default:
+				listar(request, response);
+				break;
+			}
+
+			//request.setAttribute("productos", daoProducto.getAll());
+		} catch (MySQLIntegrityConstraintViolationException e) {
+			mensajes.add(new Alerta("El nombre de ese producto ya existe.", Alerta.TIPO_DANGER));
+		} catch (ProductoException e) {
+			LOG.error(e);
+			e.printStackTrace();
+		} catch (Exception e) {
+			LOG.error(e);
+			e.printStackTrace();
+		} finally {
+			request.setAttribute("mensajesAlerta", mensajes);
+
+			request.getRequestDispatcher(vistaSeleccionada).forward(request, response);
+		}
+	}
+
+	private String operacionesVista(HttpServletRequest request, HttpServletResponse response, String destino) {
+		
+		LOG.debug("Entra en operacionVista");
+		
+		String vista = "";
+		if (destino.equals(VIEW_FORM)) {
+			int id;
+			Producto productoForm = null;
+			try {
+				if (pId != 0) {
+					LOG.debug("Recupera el Producto por su Id");
+					productoForm = daoProducto.getById(pId);
+				}
+
+				if (productoForm == null) {
+					LOG.debug("Genera un nuevo Producto");
+					productoForm = new Producto();
+				}
+			} catch (NumberFormatException e) {
+				if (productoForm == null) {
+					LOG.debug("Genera un nuevo Producto");
+					productoForm = new Producto();
+				}
+			}
+
+			LOG.debug("Pasa el Usuario y los Productos a la request");
+			request.setAttribute("usuarios", daoUsuario.getAll());
+			request.setAttribute("producto", productoForm);
+
+			vista = destino;
+		}
+
+		if (destino.equals(VIEW_TABLA)) {
+			LOG.debug("Pasa la lista de Productos del Usuario a la request");
+			request.setAttribute("productos", daoProducto.getAll());
+			vista = destino;
+		}
+		return vista;
 	}
 
 	private void eliminar(HttpServletRequest request, HttpServletResponse response) throws Exception {
+		LOG.debug("Entra en eliminar");
 		
 		daoProducto.delete(pProducto.getId());
 		mensajes.clear();
@@ -244,6 +274,7 @@ public class ProductosController extends HttpServlet {
 		// Obtener las ConstrainViolation
 		Set<ConstraintViolation<Producto>> violations = validator.validate(pProducto);
 		if (violations.size() > 0) {
+			LOG.debug("No pasa las validaciones");
 			/* No ha pasado la valiadacion, iterar sobre los mensajes de validacion */
 			for (ConstraintViolation<Producto> cv : violations) {
 				char[] caracteres = cv.getPropertyPath().toString().toCharArray();
@@ -259,6 +290,8 @@ public class ProductosController extends HttpServlet {
 			vistaSeleccionada = operacionesVista(request, response, VIEW_FORM);
 		} else {
 
+			LOG.debug("Validaciones correctas");
+			
 			Producto pojo = null;
 			List<Producto> listado = daoProducto.getAll();
 			if (pProducto.getId() == 0) {
@@ -271,15 +304,19 @@ public class ProductosController extends HttpServlet {
 				
 				pojo = pProducto;
 				pojo.setUsuario(daoUsuario.getById(usuarioId));
+				LOG.debug("Crea un Producto nuevo");
 				daoProducto.create(pojo);
 			} else {
+				LOG.debug("Itera para encontrar el Producto correcto");
 				for (Producto producto : listado) {
 					if (producto.getId() == pProducto.getId()) {
+						LOG.debug("Itera para encontrar el Producto correcto");
 						producto.setNombre(pProducto.getNombre());
 						producto.setImagen(pProducto.getImagen());
 						producto.setDescripcion(pProducto.getDescripcion());
 						producto.setDescuento(pProducto.getDescuento());
 						producto.setPrecio(pProducto.getPrecio());
+						LOG.debug("Modifica el producto");
 						daoProducto.update(producto.getId(), producto);
 					}
 				}
@@ -291,22 +328,22 @@ public class ProductosController extends HttpServlet {
 	}
 
 	private void irFormulario(HttpServletRequest request, HttpServletResponse response) {
-		Producto productoForm = null;
-
-		if (pProducto.getId() != 0) {
-			productoForm = daoProducto.getById(pId);
-		}
-
-		if (productoForm == null) {
-			productoForm = new Producto();
-		}
+		
+		LOG.debug("Entra en irFormulario");
 
 		mensajes.clear();
 		vistaSeleccionada = operacionesVista(request, response, VIEW_FORM);
 	}
 
 	private void listar(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		
+		LOG.debug("Entra en listar");
+		
+		
 		request.setAttribute("productos", daoProducto.getAll());
+		LOG.debug("Pasa el listado de productos a la request");
+		
+		
 		mensajes.clear();
 		vistaSeleccionada = operacionesVista(request, response, VIEW_TABLA);
 	}

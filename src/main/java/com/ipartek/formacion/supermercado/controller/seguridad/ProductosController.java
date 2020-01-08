@@ -171,7 +171,7 @@ public class ProductosController extends HttpServlet {
 		Producto resultado = new Producto(pId, pNombre, pPrecio, pImagen, pDescripcion, pDescuento, pFechaCreacion,
 				pFechaModificacion, pFechaEliminacion, pUsuario);
 
-		LOG.debug("Devuelve el Producto mapeado");
+		LOG.debug("Devuelve el Producto mapeado: " + resultado.toString());
 		
 		return resultado;
 	}

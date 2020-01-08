@@ -156,6 +156,8 @@ public class ProductoDAO implements IProductoDAO {
 
 		p = sanitizar(p);
 		
+		LOG.debug("Devuelve el producto mapeado: " + p.toString());
+		
 		return p;
 	}
 

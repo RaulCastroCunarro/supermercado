@@ -119,6 +119,8 @@ public class ProductosController extends HttpServlet {
 		
 		pAccion = req.getParameter("accion");
 		LOG.debug("accion: " + pAccion);
+		
+		super.service(req, resp);
 	}
 	
 	private Producto mapper(HttpServletRequest request, HttpServletResponse response) {
@@ -225,7 +227,6 @@ public class ProductosController extends HttpServlet {
 		
 		String vista = "";
 		if (destino.equals(VIEW_FORM)) {
-			int id;
 			Producto productoForm = null;
 			try {
 				if (pId != 0) {

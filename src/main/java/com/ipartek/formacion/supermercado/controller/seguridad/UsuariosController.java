@@ -123,7 +123,7 @@ public class UsuariosController extends HttpServlet {
 		pAccion = req.getParameter("accion");
 		LOG.debug("accion " + pAccion);
 
-		
+		super.service(req, resp);
 	}
 	
 	private Usuario mapper(HttpServletRequest request, HttpServletResponse response) {

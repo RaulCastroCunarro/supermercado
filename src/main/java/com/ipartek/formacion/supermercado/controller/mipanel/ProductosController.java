@@ -126,33 +126,9 @@ public class ProductosController extends HttpServlet {
 		
 		pAccion = req.getParameter("accion");
 		LOG.debug("accion: " + pAccion);
-//		if (pAccion == ACCION_FORM || pAccion == ACCION_ELIMINAR || pAccion == ACCION_GUARDAR) {
-//			if (enPropiedad()) {
-//				super.service(req, resp);
-//			}else {
-//				resp.sendRedirect("/logout");
-//			}
-//		} else {
-//			super.service(req, resp);
-//		}
+		
+		super.service(req, resp);
 	}
-
-	/*private boolean enPropiedad() {
-		
-		boolean resultado = false;
-		
-		Producto producto = daoProducto.getById(pProducto.getId());
-		
-		if (producto != null) {
-			if(usuarioSesion.getId() == producto.getUsuario().getId()) {
-				resultado = true;
-			}
-		}else if(pProducto.getId() == 0){
-			resultado = true;
-		}
-		
-		return resultado;
-	}*/
 
 	private Producto mapper(HttpServletRequest request, HttpServletResponse response) {
 		LOG.debug("Entra en el mapper");

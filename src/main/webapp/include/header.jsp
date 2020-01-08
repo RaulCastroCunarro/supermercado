@@ -59,6 +59,15 @@
 					<li class="nav-item dropdown"><a
 						class="nav-link dropdown-toggle text-primary" href="#"
 						id="navbarDropdown" role="button" data-toggle="dropdown"
+						aria-haspopup="true" aria-expanded="false">Categorías</a>
+						<div class="dropdown-menu" aria-labelledby="navbarDropdown">
+							<a class="dropdown-item" href="seguridad/categorias?accion=listar">Todas</a>
+							<a class="dropdown-item"
+								href="seguridad/categorias?accion=formulario">Nueva</a>
+						</div></li>
+					<li class="nav-item dropdown"><a
+						class="nav-link dropdown-toggle text-primary" href="#"
+						id="navbarDropdown" role="button" data-toggle="dropdown"
 						aria-haspopup="true" aria-expanded="false"> Productos </a>
 						<div class="dropdown-menu" aria-labelledby="navbarDropdown">
 							<a class="dropdown-item" href="seguridad/productos?accion=listar">Todos</a>

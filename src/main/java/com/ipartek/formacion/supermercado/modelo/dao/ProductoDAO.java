@@ -13,6 +13,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.safety.Whitelist;
 
 import com.ipartek.formacion.supermercado.modelo.ConnectionManager;
+import com.ipartek.formacion.supermercado.modelo.pojo.Categoria;
 import com.ipartek.formacion.supermercado.modelo.pojo.Producto;
 import com.ipartek.formacion.supermercado.modelo.pojo.Usuario;
 
@@ -31,6 +32,8 @@ public class ProductoDAO implements IProductoDAO {
 			"		p.fecha_creacion AS 'fecha_creacion_producto', " + 
 			"		p.fecha_modificacion AS 'fecha_modificacion_producto', " + 
 			"		p.fecha_eliminacion AS 'fecha_eliminacion_producto', " + 
+			"		c.id 'id_categoria', " + 
+			"		c.nombre 'nombre_categoria', " + 
 			"		u.id AS 'id_usuario', " + 
 			"		u.nombre 'nombre_usuario', " + 
 			"		u.contrasenia, " + 
@@ -39,8 +42,8 @@ public class ProductoDAO implements IProductoDAO {
 			"		u.fecha_creacion AS 'fecha_creacion_usuario', " + 
 			"		u.fecha_modificacion AS 'fecha_modificacion_usuario', " + 
 			"		u.fecha_eliminacion AS 'fecha_eliminacion_usuario' " + 
-			"FROM producto p INNER JOIN usuario u " + 
-			"WHERE p.fecha_eliminacion IS NULL AND p.id_usuario = u.id " + 
+			"FROM producto p, categoria c, usuario u " + 
+			"WHERE p.fecha_eliminacion IS NULL AND p.id_usuario = u.id AND c.id = p.id_categoria" + 
 			" ORDER BY p.id DESC LIMIT 500;";
 	private static final String SQL_GET_ALL_BY_USER = "SELECT " + 
 			"		p.id AS 'id_producto', " + 
@@ -52,6 +55,8 @@ public class ProductoDAO implements IProductoDAO {
 			"		p.fecha_creacion AS 'fecha_creacion_producto', " + 
 			"		p.fecha_modificacion AS 'fecha_modificacion_producto', " + 
 			"		p.fecha_eliminacion AS 'fecha_eliminacion_producto', " + 
+			"		c.id 'id_categoria', " + 
+			"		c.nombre 'nombre_categoria', " + 
 			"		u.id AS 'id_usuario', " + 
 			"		u.nombre 'nombre_usuario', " + 
 			"		u.contrasenia, " + 
@@ -60,8 +65,8 @@ public class ProductoDAO implements IProductoDAO {
 			"		u.fecha_creacion AS 'fecha_creacion_usuario', " + 
 			"		u.fecha_modificacion AS 'fecha_modificacion_usuario', " + 
 			"		u.fecha_eliminacion AS 'fecha_eliminacion_usuario' " + 
-			"FROM producto p INNER JOIN usuario u " + 
-			"WHERE p.fecha_eliminacion IS NULL AND p.id_usuario = u.id AND p.id_usuario = ?" + 
+			"FROM producto p, categoria c, usuario u " + 
+			"WHERE p.fecha_eliminacion IS NULL AND p.id_usuario = u.id AND c.id = p.id_categoria AND p.id_usuario = ?" + 
 			" ORDER BY p.id DESC LIMIT 500;";
 	private static final String SQL_GET_BY_ID = "SELECT " + 
 			"		p.id AS 'id_producto', " + 
@@ -73,6 +78,8 @@ public class ProductoDAO implements IProductoDAO {
 			"		p.fecha_creacion AS 'fecha_creacion_producto', " + 
 			"		p.fecha_modificacion AS 'fecha_modificacion_producto', " + 
 			"		p.fecha_eliminacion AS 'fecha_eliminacion_producto', " + 
+			"		c.id 'id_categoria', " + 
+			"		c.nombre 'nombre_categoria', " + 
 			"		u.id AS 'id_usuario'," + 
 			"		u.nombre AS 'nombre_usuario', " + 
 			"		u.contrasenia, " + 
@@ -81,8 +88,8 @@ public class ProductoDAO implements IProductoDAO {
 			"		u.fecha_creacion AS 'fecha_creacion_usuario'," + 
 			"		u.fecha_modificacion AS 'fecha_modificacion_usuario', " + 
 			"		u.fecha_eliminacion AS 'fecha_eliminacion_usuario' " + 
-			"FROM producto p, usuario u " + 
-			"WHERE p.fecha_eliminacion IS NULL AND p.id_usuario = u.id AND p.id = ? " + 
+			"FROM producto p, categoria c, usuario u " + 
+			"WHERE p.fecha_eliminacion IS NULL AND p.id_usuario = u.id AND c.id = p.id_categoria AND p.id = ? " + 
 			"ORDER BY p.id DESC LIMIT 500;";
 	private static final String SQL_GET_BY_ID_BY_USER = "SELECT " + 
 			"		p.id AS 'id_producto', " + 
@@ -94,6 +101,8 @@ public class ProductoDAO implements IProductoDAO {
 			"		p.fecha_creacion AS 'fecha_creacion_producto', " + 
 			"		p.fecha_modificacion AS 'fecha_modificacion_producto', " + 
 			"		p.fecha_eliminacion AS 'fecha_eliminacion_producto', " + 
+			"		c.id 'id_categoria', " + 
+			"		c.nombre 'nombre_categoria', " + 
 			"		u.id AS 'id_usuario'," + 
 			"		u.nombre AS 'nombre_usuario', " + 
 			"		u.contrasenia, " + 
@@ -102,12 +111,12 @@ public class ProductoDAO implements IProductoDAO {
 			"		u.fecha_creacion AS 'fecha_creacion_usuario'," + 
 			"		u.fecha_modificacion AS 'fecha_modificacion_usuario', " + 
 			"		u.fecha_eliminacion AS 'fecha_eliminacion_usuario' " + 
-			"FROM producto p, usuario u " + 
-			"WHERE p.fecha_eliminacion IS NULL AND p.id_usuario = u.id AND p.id = ? AND u.id = ?" + 
+			"FROM producto p, categoria c, usuario u " + 
+			"WHERE p.fecha_eliminacion IS NULL AND p.id_usuario = u.id AND c.id = p.id_categoria AND p.id = ? AND u.id = ?" + 
 			"ORDER BY p.id DESC LIMIT 500;";
-	private static final String SQL_INSERT = "INSERT INTO producto (id, nombre, imagen, precio, descuento, descripcion, fecha_creacion, id_usuario) VALUES ( ? , ?, ?, ?, ?, ?, CURRENT_TIMESTAMP(), ?);";
-	private static final String SQL_UPDATE = "UPDATE producto SET nombre= ?, imagen=?, precio=?, descuento=?, descripcion=?, fecha_modificacion=CURRENT_TIMESTAMP(), id_usuario=? WHERE id = ?;";
-	private static final String SQL_UPDATE_BY_USER = "UPDATE producto SET nombre= ?, imagen=?, precio=?, descuento=?, descripcion=?, fecha_modificacion=CURRENT_TIMESTAMP(), id_usuario=? WHERE id = ? AND id_usuario = ?;";
+	private static final String SQL_INSERT = "INSERT INTO producto (id, nombre, imagen, precio, descuento, descripcion, fecha_creacion, id_usuario, id_categoria) VALUES ( ? , ?, ?, ?, ?, ?, CURRENT_TIMESTAMP(), ?,?);";
+	private static final String SQL_UPDATE = "UPDATE producto SET nombre= ?, imagen=?, precio=?, descuento=?, descripcion=?, fecha_modificacion=CURRENT_TIMESTAMP(), id_usuario=?, id_categoria=? WHERE id = ?;";
+	private static final String SQL_UPDATE_BY_USER = "UPDATE producto SET nombre= ?, imagen=?, precio=?, descuento=?, descripcion=?, fecha_modificacion=CURRENT_TIMESTAMP(), id_usuario=?, id_categoria=? WHERE id = ? AND id_usuario = ?;";
 	private static final String SQL_DELETE = "DELETE FROM producto WHERE id = ?;";
 	private static final String SQL_DELETE_BY_USER = "DELETE FROM producto WHERE id = ? AND id_producto = ?;";
 	private static final String SQL_DELETE_LOGICO = "UPDATE producto SET fecha_eliminacion = CURRENT_TIMESTAMP() WHERE id = ?;";
@@ -134,6 +143,7 @@ public class ProductoDAO implements IProductoDAO {
 
 		Producto p = new Producto();
 		Usuario u = p.getUsuario();
+		Categoria c = p.getCategoria();
 		
 		p.setId(rs.getInt("id_producto"));
 		p.setNombre(rs.getString("nombre_producto"));
@@ -144,6 +154,9 @@ public class ProductoDAO implements IProductoDAO {
 		p.setFechaCreacion(rs.getTimestamp("fecha_creacion_producto"));
 		p.setFechaModificacion(rs.getTimestamp("fecha_modificacion_producto"));
 		p.setFechaEliminacion(rs.getTimestamp("fecha_eliminacion_producto"));
+		c.setId(rs.getInt("id_categoria"));
+		c.setNombre(rs.getString("nombre_categoria"));
+		p.setCategoria(c);
 		u.setId(rs.getInt("id_usuario"));
 		u.setNombre(rs.getString("nombre_usuario"));
 		u.setContrasenia(rs.getString("contrasenia"));
@@ -153,6 +166,7 @@ public class ProductoDAO implements IProductoDAO {
 		u.setFechaModificacion(rs.getTimestamp("fecha_modificacion_usuario"));
 		u.setFechaEliminacion(rs.getTimestamp("fecha_eliminacion_usuario"));
 		p.setUsuario(u);
+		
 
 		p = sanitizar(p);
 		
@@ -167,10 +181,13 @@ public class ProductoDAO implements IProductoDAO {
 		
 		Producto resultado = pojo;
 		Usuario usuario = pojo.getUsuario();
+		Categoria categoria = pojo.getCategoria();
 
 		resultado.setNombre(Jsoup.clean(pojo.getNombre(), Whitelist.none()));
 		resultado.setImagen(Jsoup.clean(pojo.getImagen(), Whitelist.none()));
 		resultado.setDescripcion(Jsoup.clean(pojo.getDescripcion(), Whitelist.none()));
+		categoria.setNombre(Jsoup.clean(pojo.getCategoria().getNombre(), Whitelist.none()));
+		resultado.setCategoria(categoria);
 		usuario.setNombre(Jsoup.clean(pojo.getUsuario().getNombre(), Whitelist.none()));
 		usuario.setImagen(Jsoup.clean(pojo.getUsuario().getImagen(), Whitelist.none()));
 		usuario.setEmail(Jsoup.clean(pojo.getUsuario().getEmail(), Whitelist.none()));

@@ -14,14 +14,20 @@ public class Categoria {
 	@Size(min = 1, max = 100)
 	private String nombre;
 	
+	private String imagen;
+	
 	public Categoria() {
 		super();
+		this.id = 1;
+		this.nombre = "Genérico";
+		this.imagen = "https://img.icons8.com/nolan/64/update-tag.png";
 	}
 
-	public Categoria(int id, String nombre) {
+	public Categoria(int id, String nombre, String imagen) {
 		super();
 		this.id = id;
 		this.nombre = nombre;
+		this.imagen = imagen;
 	}
 
 	public int getId() {
@@ -40,8 +46,16 @@ public class Categoria {
 		this.nombre = nombre;
 	}
 
+	public String getImagen() {
+		return imagen;
+	}
+
+	public void setImagen(String imagen) {
+		this.imagen = imagen;
+	}
+
 	@Override
 	public String toString() {
-		return "Categoria [id=" + id + ", nombre=" + nombre + "]";
+		return "Categoria [id=" + id + ", nombre=" + nombre + ", imagen=" + imagen + "]";
 	}
 }

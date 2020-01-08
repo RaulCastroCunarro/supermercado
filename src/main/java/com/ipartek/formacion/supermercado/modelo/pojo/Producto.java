@@ -50,6 +50,9 @@ public class Producto {
 	@NotNull
 	private Usuario usuario;
 
+	@NotNull
+	private Categoria categoria;
+	
 	public Producto() {
 		super();
 		this.id = 0;
@@ -62,6 +65,7 @@ public class Producto {
 		fechaModificacion = null;
 		fechaEliminacion = null;
 		this.usuario = new Usuario();
+		this.categoria = new Categoria();
 	}
 
 	public Producto(int id, String nombre, float precio, String imagen, String descripcion, int descuento,
@@ -172,6 +176,14 @@ public class Producto {
 
 	public void setUsuario(Usuario usuario) {
 		this.usuario = usuario;
+	}
+
+	public Categoria getCategoria() {
+		return categoria;
+	}
+
+	public void setCategoria(Categoria categoria) {
+		this.categoria = categoria;
 	}
 
 	public float getPrecioDescuento() {

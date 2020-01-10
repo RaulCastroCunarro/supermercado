@@ -13,7 +13,8 @@ import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.ipartek.formacion.supermercado.modelo.dao.UsuarioDAO;
 import com.ipartek.formacion.supermercado.modelo.pojo.Rol;
@@ -25,7 +26,7 @@ import com.ipartek.formacion.supermercado.modelo.pojo.Usuario;
 @WebServlet("/login")
 public class LoginController extends HttpServlet {
 	private static final long serialVersionUID = 1L;
-	private final static Logger LOG = Logger.getLogger(LoginController.class);
+	private final static Logger LOG = LogManager.getLogger(LoginController.class);
 	
 	private static UsuarioDAO dao = null;
 

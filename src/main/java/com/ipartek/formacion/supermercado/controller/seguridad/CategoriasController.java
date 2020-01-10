@@ -1,10 +1,10 @@
 package com.ipartek.formacion.supermercado.controller.seguridad;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.io.IOException;
-import java.sql.Timestamp;
-import java.util.ArrayList;
+
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -16,15 +16,13 @@ import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.ipartek.formacion.supermercado.controller.Alerta;
 import com.ipartek.formacion.supermercado.modelo.dao.CategoriaDAO;
-import com.ipartek.formacion.supermercado.modelo.dao.ProductoDAO;
-import com.ipartek.formacion.supermercado.modelo.dao.ProductoException;
 import com.ipartek.formacion.supermercado.modelo.dao.UsuarioDAO;
 import com.ipartek.formacion.supermercado.modelo.pojo.Categoria;
-import com.ipartek.formacion.supermercado.modelo.pojo.Producto;
 import com.ipartek.formacion.supermercado.modelo.pojo.Usuario;
 import com.mysql.jdbc.exceptions.MySQLIntegrityConstraintViolationException;
 
@@ -34,7 +32,7 @@ import com.mysql.jdbc.exceptions.MySQLIntegrityConstraintViolationException;
 @WebServlet("/seguridad/categorias")
 public class CategoriasController extends HttpServlet {
 	private static final long serialVersionUID = 1L;
-	private final static Logger LOG = Logger.getLogger(CategoriasController.class);
+	private final static Logger LOG = LogManager.getLogger(CategoriasController.class);
 
 	private static final String VIEW_TABLA = "categorias/index.jsp";
 	private static final String VIEW_FORM = "categorias/formulario.jsp";

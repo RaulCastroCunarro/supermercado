@@ -9,7 +9,7 @@
 	<!-- Begin Page Content -->
 	<div class="row justify-content-center h-75">
 		<div class="col-sm-7">
-			<form action="seguridad/productos" class="user" method="post">
+			<form action="seguridad/categorias" class="user" method="post">
 				<div id="formulario" class="card w-100">
 					<div class="form-group card-body shadow">
 						<label for="id">ID</label> 

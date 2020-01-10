@@ -16,7 +16,8 @@ import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.ipartek.formacion.supermercado.controller.Alerta;
 import com.ipartek.formacion.supermercado.modelo.dao.RolDAO;
@@ -31,7 +32,7 @@ import com.mysql.jdbc.exceptions.MySQLIntegrityConstraintViolationException;
 @WebServlet("/mipanel/usuarios")
 public class UsuariosController extends HttpServlet {
 	private static final long serialVersionUID = 1L;
-	private final static Logger LOG = Logger.getLogger(UsuariosController.class);
+	private final static Logger LOG = LogManager.getLogger(UsuariosController.class);
 
 	private static final String VIEW_TABLA = "usuarios/index.jsp";
 	private static final String VIEW_FORM = "usuarios/formulario.jsp";

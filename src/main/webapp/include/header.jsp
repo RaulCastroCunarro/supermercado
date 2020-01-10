@@ -49,7 +49,8 @@
 		<div class="collapse navbar-collapse" id="navbarSupportedContent">
 			<ul class="navbar-nav container d-flex flex-column flex-md-row justify-content-between">
 				<li class="nav-item"><a class="navbar-brand text-primary"
-					href="inicio"><i class="fas fa-home"></i></a></li>
+					href="inicio"><!-- <img src="https://img.icons8.com/nolan/64/home-page.png"> -->
+									<i class="fas fa-home"></i></a></li>
 
 				<c:if test="${empty usuarioLogeado}">
 					<li class="nav-item"><a class="py-2 d-none d-md-inline-block"

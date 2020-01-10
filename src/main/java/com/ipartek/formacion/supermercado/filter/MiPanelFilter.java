@@ -13,7 +13,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.ipartek.formacion.supermercado.modelo.pojo.Rol;
 import com.ipartek.formacion.supermercado.modelo.pojo.Usuario;
@@ -30,7 +31,7 @@ import com.ipartek.formacion.supermercado.modelo.pojo.Usuario;
 					, urlPatterns = { "/mipanel/*" })
 public class MiPanelFilter implements Filter {
 	
-	private final static Logger LOG = Logger.getLogger(MiPanelFilter.class);
+	private final static Logger LOG = LogManager.getLogger(MiPanelFilter.class);
 
   
 	/**

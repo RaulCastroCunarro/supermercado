@@ -18,8 +18,8 @@ public class Categoria {
 	
 	public Categoria() {
 		super();
-		this.id = 1;
-		this.nombre = "Genérico";
+		this.id = 0;
+		this.nombre = "";
 		this.imagen = "https://img.icons8.com/nolan/64/update-tag.png";
 	}
 

@@ -7,7 +7,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jsoup.Jsoup;
 import org.jsoup.safety.Whitelist;
 
@@ -18,7 +19,7 @@ import com.ipartek.formacion.supermercado.modelo.pojo.Usuario;
 
 public class UsuarioDAO implements IUsuarioDAO {
 
-	private final static Logger LOG = Logger.getLogger(UsuarioDAO.class);
+	private final static Logger LOG = LogManager.getLogger(UsuarioDAO.class);
 	
 	private static UsuarioDAO INSTANCE = null;
 

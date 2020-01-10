@@ -7,7 +7,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jsoup.Jsoup;
 import org.jsoup.safety.Whitelist;
 
@@ -16,7 +17,7 @@ import com.ipartek.formacion.supermercado.modelo.pojo.Categoria;
 
 public class CategoriaDAO implements ICategoriaDAO {
 
-	private final static Logger LOG = Logger.getLogger(CategoriaDAO.class);
+	private final static Logger LOG = LogManager.getLogger(CategoriaDAO.class);
 
 	private static CategoriaDAO INSTANCE;
 
@@ -93,7 +94,7 @@ public class CategoriaDAO implements ICategoriaDAO {
 		Categoria resultado = new Categoria();
 
 		try (Connection con = ConnectionManager.getConnection();
-				CallableStatement cs = con.prepareCall("{CALL pa_categoria_get_byid(?);}")) {
+				CallableStatement cs = con.prepareCall("{CALL pa_categoria_get_byid(?)}")) {
 			cs.setInt(1, id);
 
 			LOG.debug("Ejecuta la query: " + cs.toString());
@@ -117,7 +118,7 @@ public class CategoriaDAO implements ICategoriaDAO {
 		Categoria resultado = null;
 
 		try (Connection con = ConnectionManager.getConnection();
-				CallableStatement cs = con.prepareCall("{CALL pa_categoria_delete(?);}")) {
+				CallableStatement cs = con.prepareCall("{CALL pa_categoria_delete(?)}")) {
 
 			cs.setInt(1, id);
 
@@ -148,7 +149,7 @@ public class CategoriaDAO implements ICategoriaDAO {
 		Categoria resultado = pojo;
 
 		try (Connection con = ConnectionManager.getConnection();
-				CallableStatement cs = con.prepareCall("{CALL pa_categoria_update(?,?,?);}")) {
+				CallableStatement cs = con.prepareCall("{CALL pa_categoria_update(?,?,?)}")) {
 
 			cs.setInt(1, id);
 
@@ -178,18 +179,18 @@ public class CategoriaDAO implements ICategoriaDAO {
 		Categoria resultado = pojo;
 
 		try (Connection con = ConnectionManager.getConnection();
-				CallableStatement cs = con.prepareCall("{CALL pa_categoria_insert(?,?,?);}")) {
+				CallableStatement cs = con.prepareCall("{CALL pa_categoria_insert(?,?,?)}")) {
 
 			cs.setString(1, pojo.getNombre());
-			cs.setString(2, pojo.getImagen());
+			cs.setString(3, pojo.getImagen());
 
-			cs.registerOutParameter(3, java.sql.Types.INTEGER);
+			cs.registerOutParameter(2, java.sql.Types.INTEGER);
 
 			LOG.debug("Ejecuta la query: " + cs.toString());
 
 			int affectedRows = cs.executeUpdate();
 			if (affectedRows == 1) {
-				resultado = getById(cs.getInt(3));
+				resultado = getById(cs.getInt(2));
 			} else if (affectedRows == 0) {
 				LOG.fatal("El insert esta mal, no se ha creado ninguna categoria");
 			} else {
